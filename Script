@@ -1,10 +1,7 @@
---========================================================--
---  UTG MAIN SCRIPT (GITHUB)
---  - Self-queue on teleport
---  - No duplicate UI (Rayfield:Destroy)
---========================================================--
+-- My UI
 
---// Auto re-queue on teleport (singleton guard)
+--https://docs.sirius.menu/rayfield
+
 local url = "https://raw.githubusercontent.com/appel-yep/UTG/refs/heads/main/Script"
 local g = getgenv()
 
@@ -15,18 +12,12 @@ if q and not g.UTG_Queued then
     q('loadstring(game:HttpGet("' .. url .. '"))()')
 end
 
---// Singleton Rayfield cleanup using Rayfield:Destroy()
 if g.UTG_Rayfield and typeof(g.UTG_Rayfield.Destroy) == "function" then
     pcall(function()
         g.UTG_Rayfield:Destroy()
     end)
 end
 
---========================================================--
---  RAYFIELD SETUP
---========================================================--
-
--- https://docs.sirius.menu/rayfield
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 g.UTG_Rayfield = Rayfield
 
@@ -41,10 +32,6 @@ local Window = Rayfield:CreateWindow({
         FileName = "Big Hub"
     },
 })
-
---========================================================--
---  COMMON FUNCTIONS
---========================================================--
 
 local function sendMyMessage(messageText)
     local TextChatService = game:GetService("TextChatService")
@@ -66,18 +53,9 @@ local function sendMyMessage(messageText)
     end
 end
 
---========================================================--
---  TAB SETUP
---========================================================--
-
 local UTGTab = Window:CreateTab("Untitled Tag Glove", "tag")
 UTGTab:CreateLabel("Untitled Tag Glove Buttons")
 
---========================================================--
---  BUTTONS
---========================================================--
-
--- Button 1: TP to Barzil
 UTGTab:CreateButton({
     Name = "Tp to Barzil portal",
     Callback = function()
@@ -97,7 +75,6 @@ UTGTab:CreateButton({
     end,
 })
 
--- Button 2: Complete Obby
 UTGTab:CreateButton({
     Name = "Complete Obby",
     Callback = function()
@@ -110,7 +87,6 @@ UTGTab:CreateButton({
                 task.wait(0.1)
                 rootPart.CFrame = CFrame.new(-250, 300, -495)
 
-                -- Using the search method for the Barzil signs
                 local signsFolder = workspace:FindFirstChild("Signs")
                 if signsFolder then
                     for _, child in pairs(signsFolder:GetChildren()) do
@@ -134,7 +110,6 @@ UTGTab:CreateButton({
     end,
 })
 
--- Button 3: Obtain UTG (Easy)
 UTGTab:CreateButton({
     Name = "Obtain UTG (Easy)",
     Callback = function()
@@ -159,7 +134,6 @@ UTGTab:CreateButton({
     end,
 })
 
--- Button 4: Obtain UTG (Hard)
 UTGTab:CreateButton({
     Name = "Obtain UTG (Hard)",
     Callback = function()
