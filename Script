@@ -1,0 +1,151 @@
+-- My UI
+
+--https://docs.sirius.menu/rayfield
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+    Name = "Auto Get Badge Gloves",
+    Icon = "hand",
+    LoadingTitle = "Gloves Interface",
+    LoadingSubtitle = "Credits to stew",
+    ConfigurationSaving = {
+        Enabled = true,
+        FolderName = "BigHubConfig",
+        FileName = "Big Hub"
+    },
+})
+
+-- Common Functions
+local function sendMyMessage(messageText)
+    local TextChatService = game:GetService("TextChatService")
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local isLegacyChat = TextChatService.ChatVersion == Enum.ChatVersion.LegacyChatService
+
+    if not isLegacyChat then
+        local generalChannel = TextChatService:FindFirstChild("TextChannels") and TextChatService.TextChannels:FindFirstChild("RBXGeneral")
+        if generalChannel then
+            generalChannel:SendAsync(messageText)
+        end
+    else
+        local chatEvent = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents") and ReplicatedStorage.DefaultChatSystemChatEvents:FindFirstChild("SayMessageRequest")
+        if chatEvent then
+            chatEvent:FireServer(messageText, "All")
+        end
+    end
+end
+
+-- Tabs
+local UTGTab = Window:CreateTab("Untitled Tag Glove", "tag")
+UTGTab:CreateLabel("Untitled Tag Glove Buttons")
+
+-- Button 1: TP to Barzil
+UTGTab:CreateButton({
+    Name = "Tp to Barzil portal",
+    Callback = function()
+        if game.PlaceId == 6403373529 then 
+            local player = game.Players.LocalPlayer
+local character = player. Character or player.CharacterAdded:Wait ()
+local rootPart = character:WaitForChild("HumanoidRootPart")
+rootPart.CFrame = workspace.Lobby.brazil.portal.CFrame
+        else
+            Rayfield:Notify({
+                Title = "Wrong Game",
+                Content = "You must be in the Slap Battles Lobby to use this.",
+                Duration = 6.5,
+                Image = "rewind",
+            })
+        end
+    end,
+})
+
+-- Button 2: Complete Obby
+UTGTab:CreateButton({
+    Name = "Complete Obby",
+    Callback = function()
+        if game.PlaceId == 7234087065 then   
+            local character = game.Players.LocalPlayer.Character
+            if character and character:FindFirstChild("HumanoidRootPart") then
+                local rootPart = character.HumanoidRootPart
+                local humanoid = character:FindFirstChildOfClass("Humanoid")
+                if humanoid then humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end
+                task.wait(0.1)
+                rootPart.CFrame = CFrame.new(-250, 300, -495)
+
+                -- Using the search method for the Barzil signs
+                local signsFolder = workspace:FindFirstChild("Signs")
+                if signsFolder then
+                    for _, child in pairs(signsFolder:GetChildren()) do
+                        local target = child:FindFirstChild("Text") and child.Text:FindFirstChild("ClickDetector")
+                        if target then
+                            fireclickdetector(target)
+                            break
+                        end
+                    end
+                end
+            end
+        else
+            Rayfield:Notify({
+                Title = "Wrong Game",
+                Content = "You must be in Barzil to use this.",
+                Duration = 6.5,
+                Image = "rewind",
+            })
+        end
+    end,
+})
+
+-- Button 3: Obtain UTG (Easy)
+UTGTab:CreateButton({
+    Name = "Obtain UTG (Easy)",
+    Callback = function()
+        if game.PlaceId == 115782629143468 then   
+            sendMyMessage("IM A LOSER")
+            task.wait(1)
+            
+            local detector = workspace.Sign.Part1.ClickDetector
+            if detector then
+                fireclickdetector(detector)
+            else
+                warn("Target ClickDetector not found at workspace.Sign.Part1")
+            end
+        else
+            Rayfield:Notify({
+                Title = "Wrong Game",
+                Content = "You must be in the UTG obby to use this.",
+                Duration = 6.5,
+                Image = "rewind",
+            })
+        end
+    end,
+})
+
+-- Button 4: Obtain UTG (Hard)
+UTGTab:CreateButton({
+    Name = "Obtain UTG (Hard)",
+    Callback = function()
+        if game.PlaceId == 115782629143468 then   
+            local character = game.Players.LocalPlayer.Character
+            if character and character:FindFirstChild("HumanoidRootPart") then
+                local rootPart = character.HumanoidRootPart
+                local humanoid = character:FindFirstChildOfClass("Humanoid")
+                
+                if humanoid then humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end
+                task.wait(0.1)
+                rootPart.CFrame = CFrame.new(-7, 193, 15)
+            end
+        else
+            Rayfield:Notify({
+                Title = "Wrong Game",
+                Content = "You must be in the UTG obby to use this.",
+                Duration = 6.5,
+                Image = "rewind",
+            })
+        end
+    end,
+})
+
+UTGTab:CreateParagraph({
+    Title = "Instructions",
+    Content = "1. TP to Barzil portal.\n2. In Barzil, use 'Complete Obby'.\n3. In the UTG place, use Easy or Hard method to finish."
+})
+
