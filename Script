@@ -1,21 +1,34 @@
--- My UI
--- Auto re-queue on teleport
-local url = "https://raw.githubusercontent.com/appel-yep/UTG/refs/heads/main/Script"
-local q = queue_on_teleport or queueteleport or syn and syn.queue_on_teleport
+--========================================================--
+--  UTG MAIN SCRIPT (GITHUB)
+--  - Self-queue on teleport
+--  - No duplicate UI (Rayfield:Destroy)
+--========================================================--
 
-if q then
+--// Auto re-queue on teleport (singleton guard)
+local url = "https://raw.githubusercontent.com/appel-yep/UTG/refs/heads/main/Script"
+local g = getgenv()
+
+local q = queue_on_teleport or queueteleport or (syn and syn.queue_on_teleport)
+
+if q and not g.UTG_Queued then
+    g.UTG_Queued = true
     q('loadstring(game:HttpGet("' .. url .. '"))()')
 end
 
--- Remove old Rayfield UI if it exists
-local cg = game:GetService("CoreGui")
-local old = cg:FindFirstChild("Rayfield")
-if old then
-    old:Destroy()
+--// Singleton Rayfield cleanup using Rayfield:Destroy()
+if g.UTG_Rayfield and typeof(g.UTG_Rayfield.Destroy) == "function" then
+    pcall(function()
+        g.UTG_Rayfield:Destroy()
+    end)
 end
 
---https://docs.sirius.menu/rayfield
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+--========================================================--
+--  RAYFIELD SETUP
+--========================================================--
+
+-- https://docs.sirius.menu/rayfield
+local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
+g.UTG_Rayfield = Rayfield
 
 local Window = Rayfield:CreateWindow({
     Name = "Auto Get Badge Gloves",
@@ -29,28 +42,40 @@ local Window = Rayfield:CreateWindow({
     },
 })
 
--- Common Functions
+--========================================================--
+--  COMMON FUNCTIONS
+--========================================================--
+
 local function sendMyMessage(messageText)
     local TextChatService = game:GetService("TextChatService")
     local ReplicatedStorage = game:GetService("ReplicatedStorage")
     local isLegacyChat = TextChatService.ChatVersion == Enum.ChatVersion.LegacyChatService
 
     if not isLegacyChat then
-        local generalChannel = TextChatService:FindFirstChild("TextChannels") and TextChatService.TextChannels:FindFirstChild("RBXGeneral")
+        local generalChannel = TextChatService:FindFirstChild("TextChannels")
+            and TextChatService.TextChannels:FindFirstChild("RBXGeneral")
         if generalChannel then
             generalChannel:SendAsync(messageText)
         end
     else
-        local chatEvent = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents") and ReplicatedStorage.DefaultChatSystemChatEvents:FindFirstChild("SayMessageRequest")
+        local chatEvent = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents")
+            and ReplicatedStorage.DefaultChatSystemChatEvents:FindFirstChild("SayMessageRequest")
         if chatEvent then
             chatEvent:FireServer(messageText, "All")
         end
     end
 end
 
--- Tabs
+--========================================================--
+--  TAB SETUP
+--========================================================--
+
 local UTGTab = Window:CreateTab("Untitled Tag Glove", "tag")
 UTGTab:CreateLabel("Untitled Tag Glove Buttons")
+
+--========================================================--
+--  BUTTONS
+--========================================================--
 
 -- Button 1: TP to Barzil
 UTGTab:CreateButton({
@@ -58,9 +83,9 @@ UTGTab:CreateButton({
     Callback = function()
         if game.PlaceId == 6403373529 then 
             local player = game.Players.LocalPlayer
-local character = player. Character or player.CharacterAdded:Wait ()
-local rootPart = character:WaitForChild("HumanoidRootPart")
-rootPart.CFrame = workspace.Lobby.brazil.portal.CFrame
+            local character = player.Character or player.CharacterAdded:Wait()
+            local rootPart = character:WaitForChild("HumanoidRootPart")
+            rootPart.CFrame = workspace.Lobby.brazil.portal.CFrame
         else
             Rayfield:Notify({
                 Title = "Wrong Game",
@@ -89,7 +114,8 @@ UTGTab:CreateButton({
                 local signsFolder = workspace:FindFirstChild("Signs")
                 if signsFolder then
                     for _, child in pairs(signsFolder:GetChildren()) do
-                        local target = child:FindFirstChild("Text") and child.Text:FindFirstChild("ClickDetector")
+                        local target = child:FindFirstChild("Text")
+                            and child.Text:FindFirstChild("ClickDetector")
                         if target then
                             fireclickdetector(target)
                             break
@@ -162,4 +188,3 @@ UTGTab:CreateParagraph({
     Title = "Instructions",
     Content = "1. TP to Barzil portal.\n2. In Barzil, use 'Complete Obby'.\n3. In the UTG place, use Easy or Hard method to finish."
 })
-
