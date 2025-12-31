@@ -1,4 +1,11 @@
 -- My UI
+-- Auto re-queue on teleport
+local url = "https://raw.githubusercontent.com/appel-yep/UTG/refs/heads/main/Script"
+local q = queue_on_teleport or queueteleport or syn and syn.queue_on_teleport
+
+if q then
+    q('loadstring(game:HttpGet("' .. url .. '"))()')
+end
 
 --https://docs.sirius.menu/rayfield
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
