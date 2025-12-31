@@ -7,6 +7,13 @@ if q then
     q('loadstring(game:HttpGet("' .. url .. '"))()')
 end
 
+-- Remove old Rayfield UI if it exists
+local cg = game:GetService("CoreGui")
+local old = cg:FindFirstChild("Rayfield")
+if old then
+    old:Destroy()
+end
+
 --https://docs.sirius.menu/rayfield
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
