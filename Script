@@ -161,3 +161,4 @@ UTGTab:CreateButton({
 UTGTab:CreateParagraph({
     Title = "Instructions",
     Content = "1. TP to Barzil portal.\n2. In Barzil, use 'Complete Obby'.\n3. In the UTG place, use Easy or Hard method to finish. If you’re in a region which restricts chat, you’ll have to use the hard method."
+})
