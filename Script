@@ -1,5 +1,4 @@
 -- My UI
-
 --https://docs.sirius.menu/rayfield
 
 local url = "https://raw.githubusercontent.com/appel-yep/UTG/refs/heads/main/Script"
@@ -18,7 +17,7 @@ if g.UTG_Rayfield and typeof(g.UTG_Rayfield.Destroy) == "function" then
     end)
 end
 
-local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
+local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/stewingit/RayfieldBuilder/refs/heads/main/source.lua'))()
 g.UTG_Rayfield = Rayfield
 
 local Window = Rayfield:CreateWindow({
