@@ -1,7 +1,7 @@
 -- UTG script
 --https://docs.sirius.menu/rayfield
 
-local url = "https://raw.githubusercontent.com/appel-yep/UTG/refs/heads/main/Script"
+local url = "https://raw.githubusercontent.com/stewingit/UTG/refs/heads/main/Script"
 local g = getgenv()
 
 local q = queue_on_teleport or queueteleport or (syn and syn.queue_on_teleport)
