@@ -26,9 +26,7 @@ local Window = Rayfield:CreateWindow({
     LoadingTitle = "Gloves Interface",
     LoadingSubtitle = "Credits to stew",
     ConfigurationSaving = {
-        Enabled = true,
-        FolderName = "BigHubConfig",
-        FileName = "Big Hub"
+        Enabled = false,
     },
 })
 
