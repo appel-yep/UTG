@@ -17,7 +17,7 @@ if g.UTG_Rayfield and typeof(g.UTG_Rayfield.Destroy) == "function" then
     end)
 end
 
-local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/stewingit/RayfieldBuilder/refs/heads/main/source.lua'))()
+local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/stewingit/stewfield/refs/heads/main/source.lua'))()
 g.UTG_Rayfield = Rayfield
 
 local Window = Rayfield:CreateWindow({
