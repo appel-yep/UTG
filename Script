@@ -1,5 +1,6 @@
 -- MAIN LOADER SCRIPT
 local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/stewingit/stewfield/refs/heads/main/source.lua'))()
+
 getgenv().sbstew_Rayfield = Rayfield
 
 local Window = Rayfield:CreateWindow({
@@ -10,6 +11,9 @@ local Window = Rayfield:CreateWindow({
     ConfigurationSaving = { Enabled = true },
 })
 
+getgenv().sbstew_Window = Window
+
+-- Load the tabs
 loadstring(game:HttpGet("https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Gloves/UTG"))()
 
 Rayfield:LoadConfiguration()
