@@ -1,7 +1,23 @@
 -- MAIN LOADER SCRIPT
-local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/stewingit/stewfield/refs/heads/main/source.lua'))()
+local g = getgenv()
+local currentPlaceId = game.PlaceId
+local loaderUrl = "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Script"
 
-getgenv().sbstew_Rayfield = Rayfield
+-- 1. Auto Queue Logic
+local q = queue_on_teleport or queueteleport or (syn and syn.queue_on_teleport)
+if q and not g.sbstew_Queued then
+    g.sbstew_Queued = true
+    q('loadstring(game:HttpGet("' .. loaderUrl .. '"))()')
+end
+
+-- 2. Cleanup existing UI
+if g.sbstew_Rayfield and typeof(g.sbstew_Rayfield.Destroy) == "function" then
+    pcall(function() g.sbstew_Rayfield:Destroy() end)
+end
+
+-- 3. Initialise Rayfield
+local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/stewingit/stewfield/refs/heads/main/source.lua'))()
+g.sbstew_Rayfield = Rayfield
 
 local Window = Rayfield:CreateWindow({
     Name = "Auto Get Gloves",
@@ -11,9 +27,37 @@ local Window = Rayfield:CreateWindow({
     ConfigurationSaving = { Enabled = true },
 })
 
-getgenv().sbstew_Window = Window
+g.sbstew_Window = Window
 
--- Load the tabs
-loadstring(game:HttpGet("https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Gloves/UTG"))()
+--- 4. Place ID Storage ---
+
+local Places = {
+    ["Lobby"]    = (currentPlaceId == 6403373529 or currentPlaceId == 9015014224 or currentPlaceId == 11520107397),
+    ["Barzil"]   = (currentPlaceId == 7234087065),
+    ["UTG_Obby"] = (currentPlaceId == 115782629143468),
+}
+
+local function shouldLoad(locationList)
+    for _, name in pairs(locationList) do
+        if Places[name] then return true end
+    end
+    return false
+end
+
+local function loadTab(url)
+    local success, err = pcall(function()
+        loadstring(game:HttpGet(url))()
+    end)
+    if not success then warn("Failed to load tab: " .. err) end
+end
+
+--- 5. Tab Loading Section ---
+
+-- UNTITLED TAG GLOVE
+if shouldLoad({"Lobby", "Barzil", "UTG_Obby"}) then
+    loadTab("https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Gloves/UTG")
+end
+
+-----------------------------------------------
 
 Rayfield:LoadConfiguration()
