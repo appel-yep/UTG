@@ -32,7 +32,8 @@ AdminTab:CreateButton({
 })
 
 -- 2. Final Room TP
-AdminTab:CreateButton({
+local FinalRoomButton -- Variable to hold the button object
+FinalRoomButton = AdminTab:CreateButton({
     Name = "Tp to the final room",
     Callback = function()
         if Places["Application"] then
@@ -40,6 +41,11 @@ AdminTab:CreateButton({
             if root then
                 root.CFrame = CFrame.new(499.860291, 77.2709045, 60.5982056)
                 startTime = tick() -- Starts the 1-hour timer
+                
+                -- Destroy the button after successful use
+                if FinalRoomButton then
+                    FinalRoomButton:Destroy()
+                end
             end
         else
             Rayfield:Notify({
