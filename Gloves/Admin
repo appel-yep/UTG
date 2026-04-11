@@ -1,6 +1,6 @@
 -- ADMIN GLOVE SCRIPT
 local Rayfield = getgenv().sbstew_Rayfield
-local Window = getgenv().sbstem_Window
+local Window = getgenv().sbstew_Window
 
 local startTime = nil
 
