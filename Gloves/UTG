@@ -1,6 +1,11 @@
 -- UNTITLED TAG GLOVE TAB SCRIPT
 local Rayfield = getgenv().sbstew_Rayfield
-local Window = Rayfield.WindowState -- Accessing the window context
+local Window = getgenv().sbstew_Window
+
+if not Window then
+    warn("sbstew_Window not found! Make sure the loader ran correctly.")
+    return
+end
 
 -- Internal Helper Functions
 local function sendMyMessage(messageText)
