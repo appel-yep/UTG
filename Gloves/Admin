@@ -67,14 +67,12 @@ local AntiAFKToggle = AdminTab:CreateToggle({
                 VirtualUser:CaptureController()
                 VirtualUser:ClickButton2(Vector2.new())
             end)
-            Rayfield:Notify({Title = "Anti-AFK", Content = "Anti-AFK is Enabled", Duration = 1.5})
         else
             -- Disable Anti-AFK
             if AntiAFKConnection then
                 AntiAFKConnection:Disconnect()
                 AntiAFKConnection = nil
             end
-            Rayfield:Notify({Title = "Anti-AFK", Content = "Anti-AFK is Disabled", Duration = 1.5})
         end
     end,
 })
