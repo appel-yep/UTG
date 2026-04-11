@@ -34,7 +34,7 @@ g.sbstew_Window = Window
 local Places = {
     ["Lobby"]    = (currentPlaceId == 6403373529 or currentPlaceId == 9015014224 or currentPlaceId == 11520107397),
     ["Barzil"]   = (currentPlaceId == 7234087065),
-    ["UTG_Obby"] = (currentPlaceId == 115782629143468),
+    ["UTG_Obby"] = (currentPlaceId == 115782629143468), ["Application"] = (currentPlaceId == 16034567693),
 }
 
 local loadedAnyTab = false -- Tracker for supported content
@@ -57,6 +57,11 @@ local function loadTab(url)
 end
 
 --- 5. Tab Loading Section ---
+-- ADMIN GLOVE
+if shouldLoad({"Lobby", "Application"}) then
+    loadTab("https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Gloves/Admin")
+end
+
 -- UNTITLED TAG GLOVE
 if shouldLoad({"Lobby", "Barzil", "UTG_Obby"}) then
     loadTab("https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Gloves/UTG")
