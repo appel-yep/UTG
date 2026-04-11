@@ -1,6 +1,8 @@
 -- ADMIN GLOVE SCRIPT
 local Rayfield = getgenv().sbstew_Rayfield
-local Window = getgenv().sbstew_Window
+local Window = getgenv().sbstem_Window
+
+local startTime = nil
 
 local function isAtLobby()
     local id = game.PlaceId
@@ -41,6 +43,7 @@ AdminTab:CreateButton({
             local root = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
             if root then
                 root.CFrame = CFrame.new(499.860291, 77.2709045, 60.5982056)
+                startTime = tick() -- Starts the 1-hour timer
             end
         else
             Rayfield:Notify({
@@ -83,4 +86,40 @@ AntiAFKToggle:Set(false)
 AdminTab:CreateParagraph({
     Title = "Instructions",
     Content = "1. In the Lobby, use 'Teleport to application button'.\n2. Once in the Application place, use 'Tp to the final room'.\n3. Turn Anti-AFK on and wait 1 hour to get the badge."
+})
+
+-- 4. Check Time Remaining Button
+AdminTab:CreateButton({
+    Name = "Check time remaining",
+    Callback = function()
+        if startTime == nil then
+            Rayfield:Notify({
+                Title = "Timer Not Started",
+                Content = "You must use 'Tp to the final room' first!",
+                Duration = 4,
+                Image = "circle-alert"
+            })
+        else
+            local timeElapsed = tick() - startTime
+            local timeLeft = 3600 - timeElapsed -- 3600 seconds = 1 hour
+
+            if timeLeft <= 0 then
+                Rayfield:Notify({
+                    Title = "Time Up!",
+                    Content = "The hour is up! You should have the badge.",
+                    Duration = 5,
+                    Image = "hourglass"
+                })
+            else
+                local minutes = math.floor(timeLeft / 60)
+                local seconds = math.floor(timeLeft % 60)
+                Rayfield:Notify({
+                    Title = "Time Remaining",
+                    Content = string.format("Remaining: %d minutes and %d seconds", minutes, seconds),
+                    Duration = 5,
+                    Image = "hourglass"
+                })
+            end
+        end
+    end,
 })
