@@ -1,0 +1,23 @@
+local currentPlaceId = game.PlaceId
+
+-- Define Places Globally
+getgenv().sbstew_Places = {
+    ["Lobby"]       = (currentPlaceId == 6403373529 or currentPlaceId == 9015014224 or currentPlaceId == 11520107397),
+    ["Barzil"]      = (currentPlaceId == 7234087065),
+    ["UTG_Obby"]    = (currentPlaceId == 115782629143468),
+    ["Application"] = (currentPlaceId == 16034567693),
+}
+
+getgenv().sbstew_LoadedAnyTab = false 
+
+-- Define shouldLoad Globally
+getgenv().shouldLoad = function(locationList)
+    local Places = getgenv().sbstew_Places
+    for _, name in pairs(locationList) do
+        if Places[name] then 
+            getgenv().sbstew_LoadedAnyTab = true
+            return true 
+        end
+    end
+    return false
+end
