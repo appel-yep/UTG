@@ -43,7 +43,8 @@ BoxerTab:CreateButton({
                 Rayfield:Notify({
                     Title = "Waiting",
                     Content = "Waiting for BoxingGloves to spawn...",
-                    Duration = 2
+                    Duration = 2,
+                    Image = "hourglass"
                 })
                 
                 repeat task.wait() until workspace:FindFirstChild("BoxingGloves")
@@ -76,7 +77,7 @@ BoxerTab:CreateButton({
             local root = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
             
             if target and root then
-                root.CFrame = target.Handle.CFrame
+                root.CFrame = target.CFrame
             else
                 Rayfield:Notify({
                     Title = "Not Found",
