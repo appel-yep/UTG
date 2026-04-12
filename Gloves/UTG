@@ -1,6 +1,7 @@
 -- UNTITLED TAG GLOVE TAB SCRIPT
 local Rayfield = getgenv().sbstew_Rayfield
 local Window = getgenv().sbstew_Window
+local Places = getgenv().sbstew_Places
 
 -- Internal Helper Functions
 local function sendMyMessage(messageText)
@@ -24,7 +25,7 @@ UTGTab:CreateLabel("Untitled Tag Glove Buttons")
 UTGTab:CreateButton({
     Name = "Tp to Barzil portal",
     Callback = function()
-        if game.PlaceId == 6403373529 or game.PlaceId == 11520107397 or game.PlaceId == 9015014224 then    
+        if Places["Lobby"] then    
             firetouchinterest(game:GetService("Players").LocalPlayer.Character:WaitForChild("Head"), Workspace.Lobby.brazil.portal, 0) 
             task.wait(0.1) 
             firetouchinterest(game:GetService("Players").LocalPlayer.Character:WaitForChild("Head"), Workspace.Lobby.brazil.portal, 1)
@@ -44,7 +45,7 @@ UTGTab:CreateButton({
 UTGTab:CreateButton({
     Name = "Complete Obby",
     Callback = function()
-        if game.PlaceId == 7234087065 then   
+        if Places["Barzil"] then   
             local character = game.Players.LocalPlayer.Character
             if character and character:FindFirstChild("HumanoidRootPart") then
                 character.HumanoidRootPart.CFrame = CFrame.new(-250, 300, -495)
@@ -70,7 +71,7 @@ UTGTab:CreateButton({
 UTGTab:CreateButton({
     Name = "Obtain UTG (Method 1)",
     Callback = function()
-        if game.PlaceId == 115782629143468 then   
+        if Places["UTG_Obby"] then   
             sendMyMessage("IM A LOSER")
             task.wait(1)
             if workspace.Sign.Part1:FindFirstChild("ClickDetector") then
@@ -90,7 +91,7 @@ UTGTab:CreateButton({
 UTGTab:CreateButton({
     Name = "Obtain UTG (Method 2)",
     Callback = function()
-        if game.PlaceId == 115782629143468 then   
+        if Places["UTG"] then   
             local character = game.Players.LocalPlayer.Character
             if character and character:FindFirstChild("HumanoidRootPart") then
                 local rootPart = character.HumanoidRootPart
