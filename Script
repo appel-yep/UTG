@@ -25,7 +25,7 @@ local Window = Rayfield:CreateWindow({
     LoadingTitle = "Gloves Interface",
     LoadingSubtitle = "Credits to stew",
     ConfigurationSaving = { Enabled = false },
-    SettingsId = sbstew", 
+    SettingsId = "sbstew", 
 })
 
 g.sbstew_Window = Window
