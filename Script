@@ -35,10 +35,11 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/stewingit/sbstew/refs
 
 local createdTabs = {}
 
-local function loadTab(url)
+local function loadTab(url, name)
     local success, result = pcall(function()
         return loadstring(game:HttpGet(url))()
     end)
+    
     if not success then 
         warn("Failed to load tab: " .. tostring(result)) 
         return nil
@@ -63,24 +64,18 @@ local function handleGlove(name, locations, url)
             BadgeTab:CreateButton({
                 Name = name,
                 Callback = function()
-                    -- Check if tab was already created
-                    if createdTabs[name] then
-                        createdTabs[name]:Select()
-                    else
-                        -- Load it for the first time
-                        local newTab = loadTab(url)
+                    -- Check if tab was already created to prevent duplication
+                    if not createdTabs[name] then
+                        local newTab = loadTab(url, name)
                         if newTab and typeof(newTab) == "table" then
                             createdTabs[name] = newTab
-                            if newTab.Select then
-                                newTab:Select()
-                            end
                         end
                     end
                 end,
             })
         else
             if not createdTabs[name] then
-                local newTab = loadTab(url)
+                local newTab = loadTab(url, name)
                 if newTab then
                     createdTabs[name] = newTab
                 end
@@ -92,15 +87,9 @@ end
 getgenv().sbstew_LoadedAnyTab = false
 
 --- 6. Badge Glove Buttons ---
--- ADMIN GLOVE
 handleGlove("Admin", {"Lobby", "Application"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Gloves/Admin")
-
--- BOXER GLOVE
 handleGlove("Boxer", {"Lobby", "Barzil"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Gloves/Boxer")
-
--- UNTITLED TAG GLOVE
 handleGlove("UTG", {"Lobby", "Barzil", "UTG_Obby"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Gloves/UTG")
-
 
 -- Check if anything loaded
 if not getgenv().sbstew_LoadedAnyTab then
@@ -111,4 +100,4 @@ if not getgenv().sbstew_LoadedAnyTab then
     })
 end
 
-Rayfield:LoadConfiguration()
+Rayfield:Load()
