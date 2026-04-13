@@ -116,3 +116,5 @@ UTGTab:CreateParagraph({
     Title = "Instructions",
     Content = "1. TP to Barzil portal.\n2. In Barzil, use 'Complete Obby'.\n3. In the UTG place, use Method 1 or 2 to finish. If you’re in a region which restricts chat, you’ll have to use method 2."
 })
+
+return UTGTab
