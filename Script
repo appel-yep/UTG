@@ -40,29 +40,40 @@ local function loadTab(url)
     if not success then warn("Failed to load tab: " .. err) end
 end
 
-
-local function loadTab(url)
-    local success, err = pcall(function()
-        loadstring(game:HttpGet(url))()
-    end)
-    if not success then warn("Failed to load tab: " .. err) end
-end
-
 --- 5. Tab Loading Section ---
--- ADMIN GLOVE
-if shouldLoad({"Lobby", "Application"}) then
-    loadTab("https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Gloves/Admin")
+local isLobby = getgenv().sbstew_Places["Lobby"]
+local BadgeTab
+
+if isLobby then
+    BadgeTab = Window:CreateTab("Badges", "medal")
+    BadgeTab:CreateLabel("Select a glove to load its interface")
 end
+
+-- Helper to handle the "Load on click" or "Auto Load" logic
+local function handleGlove(name, locations, url)
+    if shouldLoad(locations) then
+        if isLobby then
+            BadgeTab:CreateButton({
+                Name = "Load " .. name,
+                Callback = function()
+                    loadTab(url)
+                end,
+            })
+        else
+            loadTab(url)
+        end
+    end
+end
+
+-- ADMIN GLOVE
+handleGlove("Admin", {"Lobby", "Application"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Gloves/Admin")
 
 -- BOXER GLOVE
-if shouldLoad({"Lobby", "Barzil"}) then
-    loadTab("https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Gloves/Boxer")
-end
+handleGlove("Boxer", {"Lobby", "Barzil"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Gloves/Boxer")
 
 -- UNTITLED TAG GLOVE
-if shouldLoad({"Lobby", "Barzil", "UTG_Obby"}) then
-    loadTab("https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Gloves/UTG")
-end
+handleGlove("UTG", {"Lobby", "Barzil", "UTG_Obby"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Gloves/UTG")
+
 
 -- Check if anything loaded
 if not getgenv().sbstew_LoadedAnyTab then
