@@ -52,6 +52,8 @@ local isLobby = getgenv().sbstew_Places["Lobby"]
 local BadgeTab
 
 if isLobby then
+    loadTab("https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Gloves/Info")
+    
     BadgeTab = Window:CreateTab("Badges", "medal")
     BadgeTab:CreateLabel("Select a badge glove to load its tab")
 end
