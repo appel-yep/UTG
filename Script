@@ -33,6 +33,9 @@ g.sbstew_Window = Window
 --- 4. External Logic & Place ID Storage ---
 loadstring(game:HttpGet("https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Places"))()
 
+-- Table to track created tabs to prevent duplicates
+local createdTabs = {}
+
 -- Modified loadTab to return the tab created by the external script
 local function loadTab(url)
     local success, result = pcall(function()
@@ -61,10 +64,18 @@ local function handleGlove(name, locations, url)
             BadgeTab:CreateButton({
                 Name = name,
                 Callback = function()
-                    local newTab = loadTab(url)
-                    -- If the script returned a tab object, select it
-                    if newTab and typeof(newTab) == "table" and newTab.Select then
-                        newTab:Select()
+                    -- Check if tab already exists in our tracking table
+                    if createdTabs[name] then
+                        createdTabs[name]:Select()
+                    else
+                        local newTab = loadTab(url)
+                        -- If the script returned a tab object, store and select it
+                        if newTab and typeof(newTab) == "table" then
+                            createdTabs[name] = newTab
+                            if newTab.Select then
+                                newTab:Select()
+                            end
+                        end
                     end
                 end,
             })
