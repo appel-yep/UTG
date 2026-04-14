@@ -1,5 +1,5 @@
 -- UNTITLED TAG GLOVE TAB SCRIPT
-local Rayfield = getgenv().sbstew_Rayfield
+local Stewfield = getgenv().sbstew_Stewfield
 local Window = getgenv().sbstew_Window
 local Places = getgenv().sbstew_Places
 
@@ -32,7 +32,7 @@ UTGTab:CreateButton({
             task.wait(2)
             game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = workspace.Lobby.brazil.portal.CFrame
         else
-            Rayfield:Notify({
+            Stewfield:Notify({
                 Title = "Wrong Game",
                 Content = "You must be in the Slap Battles Lobby to use this.",
                 Duration = 4,
@@ -58,7 +58,7 @@ UTGTab:CreateButton({
                 end
             end
         else
-            Rayfield:Notify({
+            Stewfield:Notify({
                 Title = "Wrong Game",
                 Content = "You must be in Barzil to use this.",
                 Duration = 4,
@@ -78,7 +78,7 @@ UTGTab:CreateButton({
                 fireclickdetector(workspace.Sign.Part1.ClickDetector)
             end
         else
-            Rayfield:Notify({
+            Stewfield:Notify({
                 Title = "Wrong Game",
                 Content = "You must be in the UTG obby to use this.",
                 Duration = 4,
@@ -102,7 +102,7 @@ UTGTab:CreateButton({
                 rootPart.CFrame = CFrame.new(-7, 193, 15)
             end
         else
-            Rayfield:Notify({
+            Stewfield:Notify({
                 Title = "Wrong Game",
                 Content = "You must be in the UTG obby to use this.",
                 Duration = 4,
