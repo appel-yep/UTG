@@ -9,7 +9,6 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
--- Configuration
 local Grass = Workspace.Arena["main island"].Grass
 local ZeroPosition = Grass.Position
 local BotSpeed = 21
@@ -18,26 +17,22 @@ local MaxLockDistance = 80
 local AcceptableDistance = 15
 local TargetGlove = "Swapper"
 
--- Remotes & Assets
 local SlapRemote = ReplicatedStorage.HitSwapper
 local AbilityRemote = ReplicatedStorage:WaitForChild("SLOC")
 local SlapAnimation = ReplicatedStorage.Slap
 local Reset = LocalPlayer.Reset
 
--- State Variables
 local LockedTarget = nil
 local SlapCooldown = false
 local LocalHumanoid = nil
 local Animation = nil
 local CharacterConnection = nil
-local WarpToggle = nil 
-local InfiniteMode = false -- New state to track if we should restart loops
+local WarpToggle = nil
+local InfiniteMode = false
 
--- Create Tab
 local WarpTab = Window:CreateTab("Warp Glove", "Zap")
 WarpTab:CreateLabel("Warp Glove Obtainment")
 
--- Utility Functions
 local function ReturnValidVector3Unit(Vector)
     if Vector.Magnitude == 0 then return Vector3.zero end
     return Vector.Unit
@@ -49,7 +44,7 @@ local function CharacterLoaded(Character)
     Animation = (Humanoid:FindFirstChild("Animator") or Humanoid):LoadAnimation(SlapAnimation)
     Humanoid.AutomaticScalingEnabled = false
     Humanoid.HipHeight = 0.1
-    
+
     local Support = Humanoid.RootPart:FindFirstChild("Bot Support") or Instance.new("BodyPosition")
     Support.Position = ZeroPosition
     Support.MaxForce = Vector3.new(200, 0, 200)
@@ -57,15 +52,13 @@ local function CharacterLoaded(Character)
     Support.Parent = Humanoid.RootPart
 end
 
--- Forward declaration for StartLoops
 local StartLoops
 
--- Target Logic Core
 local function GetTarget()
     if LockedTarget then
         local Character = LockedTarget.Character
         local IsValid = LockedTarget.Parent == Players and Character and Character:FindFirstChild("Humanoid") and Character.Humanoid.Health > 0
-        
+
         local outOfRange = false
         if IsValid then
             local Root = Character.Humanoid.RootPart
@@ -74,10 +67,9 @@ local function GetTarget()
             end
         end
 
-        -- If target is dead, left, or off the map
         if not IsValid or outOfRange then
             getgenv().BSF = false
-            LockedTarget = nil 
+            LockedTarget = nil
 
             task.spawn(function()
                 task.wait(0.35)
@@ -85,9 +77,10 @@ local function GetTarget()
                 task.wait(1)
                 Reset:FireServer()
             end)
+
             return nil, 512
         end
-        
+
         local Root = Character.Humanoid.RootPart
         return LockedTarget, (LocalHumanoid.RootPart.Position - Root.Position).Magnitude
     end
@@ -121,6 +114,7 @@ local function GetTarget()
             end
         end
     end
+
     return nil, 512
 end
 
@@ -131,13 +125,13 @@ StartLoops = function()
             if LocalHumanoid and LocalHumanoid.RootPart and Character then
                 if not Character:FindFirstChild("InLobby") then
                     local TargetPlayer, Distance = GetTarget()
-                    
+
                     if TargetPlayer and TargetPlayer.Character then
                         local TargetRoot = TargetPlayer.Character:FindFirstChildWhichIsA("Humanoid").RootPart
                         if LocalHumanoid.Health > 0 and TargetRoot then
                             local TargetPosition = TargetRoot.Position + ReturnValidVector3Unit(TargetRoot.AssemblyLinearVelocity)
                             LocalHumanoid:MoveTo(TargetPosition)
-                            
+
                             if Distance < AcceptableDistance and not SlapCooldown then
                                 SlapCooldown = true
                                 Animation:Play()
@@ -158,12 +152,13 @@ StartLoops = function()
                         LocalHumanoid:MoveTo(Workspace.Lobby.Teleport1.Position)
                     end
                 end
-                
+
                 if LocalHumanoid and LocalHumanoid.RootPart then
                     local Speed = BotSpeed * 2 - math.clamp(LocalHumanoid.RootPart.AssemblyLinearVelocity.Magnitude, 0, BotSpeed)
                     LocalHumanoid.WalkSpeed = Speed
                 end
             end
+
             RunService.RenderStepped:Wait()
         end
     end)
@@ -172,17 +167,20 @@ StartLoops = function()
         while task.wait(0.3) do
             if not getgenv().BSF then break end
             local Character = LocalPlayer.Character
+
             if LocalHumanoid and Character then
                 if not Character:FindFirstChild("InLobby") then
                     for _, v in ipairs(Character:GetChildren()) do
                         if v:IsA("BasePart") then v.CanTouch = false end
                     end
                 end
+
                 local Root = LocalHumanoid.RootPart
                 if Root and (Root.Position.Magnitude > 1536 or Root.Position.Y < -20) then
                     Reset:FireServer()
                     task.wait(1)
                 end
+
                 if not Character:FindFirstChildWhichIsA("Tool") and LocalPlayer.Backpack:FindFirstChildWhichIsA("Tool") then
                     LocalPlayer.Backpack:FindFirstChildWhichIsA("Tool").Parent = Character
                 end
@@ -202,12 +200,18 @@ WarpTab:CreateButton({
 
         local unlocked = LocalPlayer:FindFirstChild("_unlockedGloves")
         if unlocked and unlocked:FindFirstChild("Warp") and unlocked.Warp.Value == true then
-            Stewfield:Notify({Title = "Already Obtained", Content = "You already have the Warp glove!", Duration = 4, Image = "circle-alert"})
+            Stewfield:Notify({
+                Title = "Already Obtained",
+                Content = "You already have the Warp glove!",
+                Duration = 4,
+                Image = "circle-alert"
+            })
         else
             InfiniteMode = false
             getgenv().BSF = true
-            if LocalPlayer.Character then 
-                CharacterLoaded(LocalPlayer.Character) 
+
+            if LocalPlayer.Character then
+                CharacterLoaded(LocalPlayer.Character)
                 StartLoops()
             end
         end
@@ -215,22 +219,22 @@ WarpTab:CreateButton({
 })
 
 WarpToggle = WarpTab:CreateToggle({
-    Name = "Infinite Warp",
+    Name = "Retry",
     CurrentValue = false,
     Flag = "AutoWarp_Flag",
     Callback = function(Value)
         getgenv().BSF = Value
         InfiniteMode = Value
-        
+
         if Value then
-            if LocalPlayer.Character then 
-                CharacterLoaded(LocalPlayer.Character) 
+            if LocalPlayer.Character then
+                CharacterLoaded(LocalPlayer.Character)
                 StartLoops()
             end
-            
+
             if not CharacterConnection then
                 CharacterConnection = LocalPlayer.CharacterAdded:Connect(function(char)
-                    task.wait(0.5) 
+                    task.wait(0.5)
                     if InfiniteMode then
                         getgenv().BSF = true
                         CharacterLoaded(char)
@@ -249,7 +253,7 @@ WarpToggle = WarpTab:CreateToggle({
 
 WarpTab:CreateParagraph({
     Title = "Instructions",
-    Content = "1. 'Get Warp' will run the bot once if you don't own warp. \n2. 'Infinite retry' wil run until turned off manually even if warp is obtained."
+    Content = "1. Press 'Get Warp' to run the bot once, if you already have warp the bot won't run.\n2. If you don't want to press the button each time turn on 'retry' which will run the bot infinitely until turned off.\n3. To start the script either press the button once, or turn the toggle on\n4. The bot is basic so it may take a few tries"
 })
 
 return WarpTab
