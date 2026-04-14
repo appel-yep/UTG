@@ -33,6 +33,13 @@ local InfiniteMode = false
 local WarpTab = Window:CreateTab("Warp Glove", "Zap")
 WarpTab:CreateLabel("Warp Glove Obtainment")
 
+-- Function to check current slaps
+local function getStats()
+    local stats = LocalPlayer:FindFirstChild("leaderstats")
+    local slaps = (stats and stats:FindFirstChild("Slaps")) and stats.Slaps.Value or 0
+    return slaps
+end
+
 local function ReturnValidVector3Unit(Vector)
     if Vector.Magnitude == 0 then return Vector3.zero end
     return Vector.Unit
@@ -143,7 +150,19 @@ StartLoops = function()
                         LocalHumanoid:MoveTo(LocalHumanoid.RootPart.Position)
                     end
                 else
+                    -- OWNERSHIP CHECK BEFORE EQUIP
                     if LocalPlayer.leaderstats.Glove.Value ~= TargetGlove then
+                        if getStats() < 350 then
+                            getgenv().BSF = false
+                            Stewfield:Notify({
+                                Title = "Insufficient Slaps",
+                                Content = "You need 350 slaps to use Swapper!",
+                                Duration = 5,
+                                Image = "circle-x"
+                            })
+                            return
+                        end
+                        
                         local GloveObj = Workspace.Lobby:WaitForChild(TargetGlove, 2)
                         if GloveObj then
                             fireclickdetector(GloveObj:FindFirstChildOfClass("ClickDetector"))
