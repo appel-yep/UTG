@@ -272,7 +272,7 @@ WarpToggle = WarpTab:CreateToggle({
 
 WarpTab:CreateParagraph({
     Title = "Instructions",
-    Content = "1. Press 'Get Warp' to run the bot once, if you already have warp the bot won't run.\n2. If you don't want to press the button each time turn on 'retry' which will run the bot infinitely until turned off.\n3. To start the script either press the button once, or turn the toggle on\n4. The bot is basic so it may take a few tries"
+    Content = "1. Press 'Get Warp' to run the bot once. (It won't run if you already have Warp.)\n2. Enable 'Retry' to let the bot run automatically until you turn it off.\n3. Start the script by either clicking the button or switching the toggle on.\n4. If it doesn't work immediately, just try a few more times!"
 })
 
 return WarpTab
