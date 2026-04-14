@@ -1,0 +1,124 @@
+-- WARP GLOVE TAB SCRIPT
+local Stewfield = getgenv().sbstew_Stewfield
+local Window = getgenv().sbstew_Window
+local Places = getgenv().sbstew_Places
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+
+-- Create Tab
+local WarpTab = Window:CreateTab("Warp Glove", "Zap")
+WarpTab:CreateLabel("Warp Glove Obtainment")
+
+local WarpBotActive = false
+
+WarpTab:CreateToggle({
+    Name = "Auto Get Warp",
+    CurrentValue = false,
+    Flag = "AutoWarp_Flag",
+    Callback = function(Value)
+        WarpBotActive = Value
+        
+        if Value then
+            -- Check if already owned
+            local unlocked = LocalPlayer:FindFirstChild("_unlockedGloves")
+            if unlocked and unlocked:FindFirstChild("Warp") and unlocked.Warp.Value == true then
+                Stewfield:Notify({
+                    Title = "Already Unlocked",
+                    Content = "You already have the Warp glove!",
+                    Duration = 5,
+                    Image = "check-circle",
+                })
+                return
+            end
+
+            -- Start the Bot Logic
+            task.spawn(function()
+                while WarpBotActive do
+                    -- Check ownership inside loop to stop if obtained
+                    local hasWarp = false
+                    local check = LocalPlayer:FindFirstChild("_unlockedGloves")
+                    if check and check:FindFirstChild("Warp") and check.Warp.Value == true then
+                        hasWarp = true
+                    end
+
+                    if hasWarp then
+                        WarpBotActive = false
+                        Stewfield:Notify({
+                            Title = "Success!",
+                            Content = "Warp Glove has been obtained!",
+                            Duration = 5,
+                            Image = "party-popper",
+                        })
+                        break
+                    end
+
+                    -- Bot Logic Core
+                    local TargetGlove = "Swapper"
+                    local SlapRemote = ReplicatedStorage.HitSwapper
+                    local AbilityRemote = ReplicatedStorage:WaitForChild("SLOC")
+                    local SlapAnimation = ReplicatedStorage.Slap
+                    
+                    local Character = LocalPlayer.Character
+                    if Character and Character:FindFirstChild("Humanoid") then
+                        local Humanoid = Character.Humanoid
+                        local HRP = Humanoid.RootPart
+                        
+                        if Character:FindFirstChild("InLobby") then
+                            -- Equip Swapper if needed
+                            if LocalPlayer.leaderstats.Glove.Value ~= TargetGlove then
+                                local GloveObj = Workspace.Lobby:WaitForChild(TargetGlove, 2)
+                                if GloveObj then
+                                    fireclickdetector(GloveObj:FindFirstChildOfClass("ClickDetector"))
+                                end
+                            else
+                                -- Go to Portal
+                                Humanoid:MoveTo(Workspace.Lobby.Teleport1.Position)
+                            end
+                        else
+                            -- Arena Logic: Find Target
+                            local LockedTarget = nil
+                            for _, v in ipairs(Players:GetPlayers()) do
+                                if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
+                                    local TRoot = v.Character.Humanoid.RootPart
+                                    if TRoot and not v.Character:FindFirstChild("InLobby") and not v.Character:FindFirstChild("rock") then
+                                        LockedTarget = v
+                                        break
+                                    end
+                                end
+                            end
+
+                            if LockedTarget then
+                                local TRoot = LockedTarget.Character.Humanoid.RootPart
+                                Humanoid:MoveTo(TRoot.Position)
+                                
+                                -- Slap Logic
+                                if (HRP.Position - TRoot.Position).Magnitude < 15 then
+                                    SlapRemote:FireServer(TRoot)
+                                    task.wait(0.6)
+                                end
+                            else
+                                -- No targets, reset or swap to find new server/area
+                                task.wait(0.5)
+                                AbilityRemote:FireServer()
+                                task.wait(0.5)
+                                Character.Humanoid.Health = 0
+                            end
+                        end
+                    end
+                    task.wait(0.1)
+                end
+            end)
+        end
+    end,
+})
+
+WarpTab:CreateParagraph({
+    Title = "Instructions",
+    Content = "1. Turn on the toggle to auto get Warp!\n2. The bot will automatically equip Swapper and attempt to slap players then swap.\n3. The bot is basic so it might take a few tries."
+})
+
+return WarpTab
