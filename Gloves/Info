@@ -1,10 +1,13 @@
 local Stewfield = getgenv().sbstew_Stewfield
-local Window = getgenv().sbstew_Window
+local Window = getgenv().sbstValue_Window
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Workspace = game:GetService("Workspace")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local MarketPlaceService = game:GetService("MarketplaceService")
+
+local gameName = MarketPlaceService:GetProductInfo(game.PlaceId).Name
 
 -- Helper logic for Stats
 local function getStats()
@@ -61,24 +64,41 @@ local slaps, glove, fraction, shards, keypad, code = getStats()
 
 local InfoTab = Window:CreateTab("Info", "info")
 
+InfoTab:CreateLabel("SBStew Script")
+InfoTab:CreateParagraph({
+    Title = "Overview",
+    Content = "SBStew is the premier script for Slap Battles. Access a massive suite of features including automated glove obtainment, slap and mastery farming."
+})
+
+InfoTab:CreateDivider()
+
 InfoTab:CreateLabel("Instructions")
 InfoTab:CreateParagraph({
     Title = "How to use",
-    Content = "Select a glove from the Badges tab to begin. Ensure you meet the requirements listed in the stats section below for specific glove unlocks."
+    Content = "• Search the 'Badges' tab and click on your desired glove.\n" ..
+              "• Once clicked, open the new tab created specifically for that glove.\n" ..
+              "• Change script settings by clicking the cog icon in the topbar.\n" ..
+              "• If you'd like to remain on the same tab throughout turn on 'remember previous tab' in settings."
 })
+
 InfoTab:CreateDivider()
 
 InfoTab:CreateLabel("Player & Server Information")
 
 local StatsParagraph = InfoTab:CreateParagraph({
-    Title = "Current Stats",
-    Content = "• Account Age: " .. LocalPlayer.AccountAge .. " days\n" ..
-              "• Keypad Spawn: " .. keypad .. "\n" ..
-              "• Keypad Code: " .. code .. "\n" ..
+    Title = "Live Information",
+    Content = "--- Player Info ---\n" ..
+              "• Name: " .. LocalPlayer.Name .. " (" .. LocalPlayer.UserId .. ")\n" ..
+              "• Account Age: " .. LocalPlayer.AccountAge .. " days\n" ..
               "• Slaps: " .. slaps .. "\n" ..
               "• Null Shards: " .. shards .. "\n" ..
-              "• Equipped Glove: " .. glove .. "\n" ..
-              "• Gloves Owned: " .. fraction
+              "• Gloves Owned: " .. fraction .. "\n" ..
+              "• Equipped: " .. glove .. "\n\n" ..
+              "--- Server Info ---\n" ..
+              "• Game: " .. gameName .. "\n" ..
+              "• Place ID: " .. game.PlaceId .. "\n" ..
+              "• Keypad Spawn: " .. keypad .. "\n" ..
+              "• Keypad Code: " .. code
 })
 
 -- Auto-Update Logic: Refreshes every second
@@ -86,14 +106,19 @@ task.spawn(function()
     while task.wait(1) do
         local uSlaps, uGlove, uFraction, uShards, uKeypad, uCode = getStats()
         StatsParagraph:Set({
-            Title = "Current Stats",
-            Content = "• Account Age: " .. LocalPlayer.AccountAge .. " days\n" ..
-                      "• Keypad Spawn: " .. uKeypad .. "\n" ..
-                      "• Keypad Code: " .. uCode .. "\n" ..
+            Title = "Live Information",
+            Content = "--- Player Info ---\n" ..
+                      "• Name: " .. LocalPlayer.Name .. " (" .. LocalPlayer.UserId .. ")\n" ..
+                      "• Account Age: " .. LocalPlayer.AccountAge .. " days\n" ..
                       "• Slaps: " .. uSlaps .. "\n" ..
                       "• Null Shards: " .. uShards .. "\n" ..
-                      "• Equipped Glove: " .. uGlove .. "\n" ..
-                      "• Gloves Owned: " .. uFraction
+                      "• Gloves Owned: " .. uFraction .. "\n" ..
+                      "• Equipped: " .. uGlove .. "\n\n" ..
+                      "--- Server Info ---\n" ..
+                      "• Game: " .. gameName .. "\n" ..
+                      "• Place ID: " .. game.PlaceId .. "\n" ..
+                      "• Keypad Spawn: " .. uKeypad .. "\n" ..
+                      "• Keypad Code: " .. uCode
         })
     end
 end)
