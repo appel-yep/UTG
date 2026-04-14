@@ -1,5 +1,5 @@
 local Stewfield = getgenv().sbstew_Stewfield
-local Window = getgenv().sbstValue_Window
+local Window = getgenv().sbstew_Window
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
