@@ -10,7 +10,7 @@ local Workspace = game:GetService("Workspace")
 
 local Grass = Workspace.Arena["main island"].Grass
 local ZeroPosition = Grass.Position
-local BotSpeed = 21
+local BotSpeed = 22
 local RoamRange = 120
 local MaxLockDistance = 80
 local AcceptableDistance = 15
@@ -19,7 +19,6 @@ local TargetGlove = "Warp"
 local SlapRemote = ReplicatedStorage:WaitForChild("WarpHt")
 local AbilityRemote = ReplicatedStorage:WaitForChild("WLOC")
 local SlapAnimation = ReplicatedStorage.Slap
-local Reset = LocalPlayer.Reset
 
 local LockedTarget = nil
 local SlapCooldown = false
@@ -30,11 +29,6 @@ local HasSlapped = false
 local BombTab = Window:CreateTab("Bomb Glove", "Bomb")
 BombTab:CreateLabel("Bomb Glove Obtainment (Needs Warp)")
 
-local function ReturnValidVector3Unit(Vector)
-    if Vector.Magnitude == 0 then return Vector3.zero end
-    return Vector.Unit
-end
-
 local function CharacterLoaded(Character)
     local Humanoid = Character:WaitForChild("Humanoid", 10)
     LocalHumanoid = Humanoid
@@ -42,32 +36,42 @@ local function CharacterLoaded(Character)
     Humanoid.AutomaticScalingEnabled = false
     Humanoid.HipHeight = 0.1
 
-    local Support = Humanoid.RootPart:FindFirstChild("Bot Support") or Instance.new("BodyPosition")
+    local Root = Character:WaitForChild("HumanoidRootPart")
+    local Support = Root:FindFirstChild("Bot Support") or Instance.new("BodyPosition")
     Support.Position = ZeroPosition
     Support.MaxForce = Vector3.new(200, 0, 200)
     Support.Name = "Bot Support"
-    Support.Parent = Humanoid.RootPart
+    Support.Parent = Root
     HasSlapped = false
 end
 
-local function GetTarget()
-    if LockedTarget then
-        local Character = LockedTarget.Character
-        local IsValid = LockedTarget.Parent == Players and Character and Character:FindFirstChild("Humanoid") and Character.Humanoid.Health > 0
-        if not IsValid then LockedTarget = nil return nil, 512 end
-        local Root = Character.Humanoid.RootPart
-        return LockedTarget, (LocalHumanoid.RootPart.Position - Root.Position).Magnitude
-    end
-
+local function GetTarget(LocalHumanoid)
     for _, v in ipairs(Players:GetPlayers()) do
         local Character = v.Character
-        if v ~= LocalPlayer and Character then
+        if v ~= LocalPlayer and Character and not LocalPlayer:IsFriendsWith(v.UserId) then
             local Humanoid = Character:FindFirstChildWhichIsA("Humanoid")
-            if Humanoid and Humanoid.Health > 0 and Humanoid.RootPart then
-                local Distance = (LocalHumanoid.RootPart.Position - Humanoid.RootPart.Position).Magnitude
-                if Distance <= MaxLockDistance and not Character:FindFirstChild("InLobby") then
-                    LockedTarget = v
-                    return v, Distance
+            if Humanoid and Humanoid.Health > 0 then
+                local Root = Humanoid.RootPart
+                if Root then
+                    local Distance = (LocalHumanoid.RootPart.Position - Root.Position).Magnitude
+                    local InMap = (Root.Position - ZeroPosition).Magnitude < RoamRange
+                    
+                    -- Advanced Filters
+                    local InLobby = Character:FindFirstChild("InLobby")
+                    local Rock = Character:FindFirstChild("rock")
+                    local Reverse = Character:FindFirstChild("Reversed")
+                    local Skull = Character:FindFirstChild("Skull")
+                    local Counter = Character:FindFirstChild("Counterd")
+                    local Steve = Character:FindFirstChild("stevebody")
+                    local Visible = Character:FindFirstChild("CarKeysCar") or (Character:FindFirstChild("Head") or Character:FindFirstChildWhichIsA("BasePart")).Transparency == 0
+                    local BuddyBox = Character.Head:FindFirstChild("BuddyBox")
+                    local Ragdolled = Character:FindFirstChild("FakePart Right Arm")
+
+                    local Approved = (InMap and Distance <= MaxLockDistance and not Rock and not Reverse and not Steve and not Skull and Visible and not BuddyBox and not Ragdolled and not InLobby and not Counter)
+
+                    if Approved then
+                        return Root, Distance
+                    end
                 end
             end
         end
@@ -79,7 +83,7 @@ local function StartBombLoop()
     task.spawn(function()
         while getgenv().BSF_Bomb do
             local Character = LocalPlayer.Character
-            if LocalHumanoid and LocalHumanoid.RootPart and Character then
+            if LocalHumanoid and LocalHumanoid.Parent and Character then
                 
                 -- 1. CHECK LOBBY / EQUIP
                 if Character:FindFirstChild("InLobby") then
@@ -94,37 +98,43 @@ local function StartBombLoop()
                 
                 -- 2. ARENA LOGIC
                 elseif not HasSlapped then
-                    local TargetPlayer, Distance = GetTarget()
-                    if TargetPlayer and TargetPlayer.Character then
-                        local TargetRoot = TargetPlayer.Character:FindFirstChildWhichIsA("Humanoid").RootPart
+                    local TargetRoot, Distance = GetTarget(LocalHumanoid)
+                    if TargetRoot then
                         LocalHumanoid:MoveTo(TargetRoot.Position)
-
                         if Distance < AcceptableDistance and not SlapCooldown then
                             SlapCooldown = true
                             Animation:Play()
-                            -- Using the Target's RootPart as the "Torso" argument
                             SlapRemote:FireServer(TargetRoot)
                             HasSlapped = true
                             task.delay(0.6, function() SlapCooldown = false end)
                         end
                     end
+                
+                -- 3. ABILITY & BARRIER
                 else
-                    -- 3. WALK OFF MAP
-                    LocalHumanoid:MoveTo(Vector3.new(ZeroPosition.X + RoamRange + 20, ZeroPosition.Y, ZeroPosition.Z))
+                    task.wait(2) -- Wait 2 seconds after slap
                     
-                    -- 4. CHECK FOR VOID/BARRIER
-                    local RootPos = LocalHumanoid.RootPart.Position
-                    if RootPos.Y < 10 then 
-                        AbilityRemote:FireServer({}) 
-                        task.wait(0.5)
-                        getgenv().BSF_Bomb = false 
+                    -- Fire Ability
+                    AbilityRemote:FireServer({})
+                    
+                    task.wait(0.1) -- Wait 0.1 seconds
+                    
+                    -- Instant Death Barrier Touch
+                    local leg = Character:FindFirstChild("Left Leg") or LocalHumanoid.RootPart
+                    local barrier = Workspace:FindFirstChild("DEATHBARRIER") or Workspace:FindFirstChild("dedBarrier")
+                    
+                    if barrier then
+                        firetouchinterest(leg, barrier, 0)
+                        task.wait(0.05)
+                        firetouchinterest(leg, barrier, 1)
                     end
+                    
+                    getgenv().BSF_Bomb = false -- Stop script
                 end
 
                 -- Maintain Speed
                 if LocalHumanoid.RootPart then
-                    local Speed = BotSpeed * 2 - math.clamp(LocalHumanoid.RootPart.AssemblyLinearVelocity.Magnitude, 0, BotSpeed)
-                    LocalHumanoid.WalkSpeed = Speed
+                    LocalHumanoid.WalkSpeed = BotSpeed
                 end
             end
             RunService.RenderStepped:Wait()
@@ -158,7 +168,7 @@ BombTab:CreateButton({
 
 BombTab:CreateParagraph({
     Title = "Instructions",
-    Content = "1. Press 'Get Bomb' to run the bot once, if you don't have Warp the bot won't run.\n2. The bot will automatically equip Warp, enter the arena, slap someone, and walk off the edge.\n3. It will fire the ability when reaching the barrier to attempt the badge unlock.\n4. The bot is basic so it may take a few tries."
+    Content = "1. Press 'Get Bomb' to run the bot once, if you don't have Warp the bot won't run."
 })
 
 return BombTab
