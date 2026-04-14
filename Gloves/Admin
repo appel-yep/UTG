@@ -1,5 +1,5 @@
 -- ADMIN GLOVE SCRIPT
-local Rayfield = getgenv().sbstew_Rayfield
+local Stewfield = getgenv().sbstew_Stewfield
 local Window = getgenv().sbstew_Window
 local Places = getgenv().sbstew_Places
 
@@ -21,7 +21,7 @@ AdminTab:CreateButton({
                 root.CFrame = CFrame.new(-16976, 801, 4907)
             end
         else
-            Rayfield:Notify({
+            Stewfield:Notify({
                 Title = "Wrong Game", 
                 Content = "You must be in the Slap Battles Lobby to use this.", 
                 Duration = 4,
@@ -48,7 +48,7 @@ FinalRoomButton = AdminTab:CreateButton({
                 end
             end
         else
-            Rayfield:Notify({
+            Stewfield:Notify({
                 Title = "Wrong Game", 
                 Content = "You must be in the Admin Application place to use this.", 
                 Duration = 4,
@@ -95,7 +95,7 @@ AdminTab:CreateButton({
     Name = "Check time remaining",
     Callback = function()
         if startTime == nil then
-            Rayfield:Notify({
+            Stewfield:Notify({
                 Title = "Timer Not Started",
                 Content = "You must use 'Tp to the final room' first!",
                 Duration = 3,
@@ -106,7 +106,7 @@ AdminTab:CreateButton({
             local timeLeft = 3600 - timeElapsed -- 3600 seconds = 1 hour
 
             if timeLeft <= 0 then
-                Rayfield:Notify({
+                Stewfield:Notify({
                     Title = "Time Up!",
                     Content = "The hour is up! You should get the badge now or very soon.",
                     Duration = 3,
@@ -115,7 +115,7 @@ AdminTab:CreateButton({
             else
                 local minutes = math.floor(timeLeft / 60)
                 local seconds = math.floor(timeLeft % 60)
-                Rayfield:Notify({
+                Stewfield:Notify({
                     Title = "Time Remaining",
                     Content = string.format("Remaining: %d minutes and %d seconds", minutes, seconds),
                     Duration = 5,
