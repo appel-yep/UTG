@@ -16,7 +16,7 @@ local MaxLockDistance = 80
 local AcceptableDistance = 15
 local TargetGlove = "Warp"
 
-local SlapRemote = ReplicatedStorage.HitWarp
+local SlapRemote = ReplicatedStorage:WaitForChild("WarpHt")
 local AbilityRemote = ReplicatedStorage:WaitForChild("WLOC")
 local SlapAnimation = ReplicatedStorage.Slap
 local Reset = LocalPlayer.Reset
@@ -102,6 +102,7 @@ local function StartBombLoop()
                         if Distance < AcceptableDistance and not SlapCooldown then
                             SlapCooldown = true
                             Animation:Play()
+                            -- Using the Target's RootPart as the "Torso" argument
                             SlapRemote:FireServer(TargetRoot)
                             HasSlapped = true
                             task.delay(0.6, function() SlapCooldown = false end)
@@ -141,7 +142,7 @@ BombTab:CreateButton({
             Stewfield:Notify({
                 Title = "Missing Requirement",
                 Content = "You need the Warp glove unlocked first!",
-                Duration = 5,
+                Duration = 3,
                 Image = "lock"
             })
             return
