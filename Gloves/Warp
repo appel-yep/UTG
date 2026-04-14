@@ -30,6 +30,7 @@ local SlapCooldown = false
 local LocalHumanoid = nil
 local Animation = nil
 local CharacterConnection = nil
+local WarpToggle = nil -- To store the toggle reference
 
 -- Create Tab
 local WarpTab = Window:CreateTab("Warp Glove", "Zap")
@@ -70,10 +71,12 @@ local function GetTarget()
         end
 
         if not IsValid or outOfRange then
+            -- STOP IMMEDIATELY
             LockedTarget = nil 
+            LocalHumanoid:MoveTo(LocalHumanoid.RootPart.Position)
             
             task.spawn(function()
-                task.wait(0.35)
+                task.wait(0.1) -- Minimal delay to ensure MoveTo registered
                 AbilityRemote:FireServer()
                 task.wait(1)
                 Reset:FireServer()
@@ -121,10 +124,11 @@ local function StartLoops()
     -- Behavior Loop
     task.spawn(function()
         while getgenv().BSF do
-            -- Auto-Stop if Warp is obtained
+            -- Auto-Stop if Warp is obtained (Folder Check)
             local unlocked = LocalPlayer:FindFirstChild("_unlockedGloves")
             if unlocked and unlocked:FindFirstChild("Warp") and unlocked.Warp.Value == true then
                 getgenv().BSF = false
+                if WarpToggle then WarpToggle:Set(false) end
                 Stewfield:Notify({Title = "Success", Content = "Warp Obtained! Stopping bot.", Duration = 5})
                 break
             end
@@ -151,8 +155,19 @@ local function StartLoops()
                         LocalHumanoid:MoveTo(LocalHumanoid.RootPart.Position)
                     end
                 else
-                    -- Lobby Logic
-                    if LocalPlayer.leaderstats.Glove.Value ~= TargetGlove then
+                    -- Lobby Logic: Try Warp first to verify badge
+                    local WarpGlove = Workspace.Lobby:WaitForChild("Warp", 1)
+                    if WarpGlove then
+                        fireclickdetector(WarpGlove:FindFirstChildOfClass("ClickDetector"))
+                        task.wait(0.2)
+                    end
+
+                    if LocalPlayer.leaderstats.Glove.Value == "Warp" then
+                        getgenv().BSF = false
+                        if WarpToggle then WarpToggle:Set(false) end
+                        Stewfield:Notify({Title = "Success", Content = "Warp Equipped! Stopping bot.", Duration = 5})
+                        break
+                    elseif LocalPlayer.leaderstats.Glove.Value ~= TargetGlove then
                         local GloveObj = Workspace.Lobby:WaitForChild(TargetGlove, 2)
                         if GloveObj then
                             fireclickdetector(GloveObj:FindFirstChildOfClass("ClickDetector"))
@@ -192,7 +207,7 @@ local function StartLoops()
     end)
 end
 
-WarpTab:CreateToggle({
+WarpToggle = WarpTab:CreateToggle({
     Name = "Auto Get Warp",
     CurrentValue = false,
     Flag = "AutoWarp_Flag",
