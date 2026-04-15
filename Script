@@ -3,6 +3,9 @@ local g = getgenv()
 local currentPlaceId = game.PlaceId
 local loaderUrl = "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Script"
 
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
 -- 1. Auto Queue Logic
 local q = queue_on_teleport or queueteleport or (syn and syn.queue_on_teleport)
 if q and not g.sbstew_Queued then
@@ -20,11 +23,9 @@ local Stewfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/ste
 g.sbstew_Stewfield = Stewfield
 
 local Window = Stewfield:CreateWindow({
-    Name = "Auto Get Gloves",
+    Name = "Slap Battle Stew",
     Icon = "hand",
-    LoadingTitle = "Gloves Interface",
-    LoadingSubtitle = "Credits to stew",
-    ConfigurationSaving = { Enabled = false },
+    LoadingTitle = "SBStew",
     SettingsId = "sbstew", 
 })
 
@@ -34,6 +35,7 @@ g.sbstew_Window = Window
 loadstring(game:HttpGet("https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Places"))()
 
 local createdTabs = {}
+local ownedSection, notOwnedSection
 
 local function loadTab(url, name)
     local success, result = pcall(function()
@@ -52,10 +54,14 @@ local isLobby = getgenv().sbstew_Places["Lobby"]
 local BadgeTab
 
 if isLobby then
-    loadTab("https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Gloves/Info")
+    loadTab("https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Info")
     
     BadgeTab = Window:CreateTab("Badges", "medal")
     BadgeTab:CreateLabel("Select a badge glove to load its tab")
+    
+    -- Create the requested sections
+    ownedSection = BadgeTab:CreateSection("Owned")
+    notOwnedSection = BadgeTab:CreateSection("Not Yet Owned")
 end
 
 local function handleGlove(name, locations, url)
@@ -63,7 +69,14 @@ local function handleGlove(name, locations, url)
         getgenv().sbstew_LoadedAnyTab = true 
         
         if isLobby then
-            BadgeTab:CreateButton({
+            -- Ownership Check logic
+            local unlocked = LocalPlayer:FindFirstChild("_unlockedGloves")
+            local isOwned = unlocked and unlocked:FindFirstChild(name) and unlocked[name].Value == true
+            
+            -- Choose target section based on ownership
+            local targetSection = isOwned and ownedSection or notOwnedSection
+            
+            targetSection:CreateButton({
                 Name = name,
                 Callback = function()
                     -- Check if tab was already created to prevent duplication
@@ -89,11 +102,11 @@ end
 getgenv().sbstew_LoadedAnyTab = false
 
 --- 6. Badge Glove Buttons ---
-handleGlove("Admin", {"Lobby", "Application"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Gloves/Admin")
-handleGlove("Bomb", {"Lobby"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Gloves/Bomb")
-handleGlove("Boxer", {"Lobby", "Barzil"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Gloves/Boxer")
-handleGlove("UTG", {"Lobby", "Barzil", "UTG_Obby"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Gloves/UTG")
-handleGlove("Warp", {"Lobby"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Gloves/Warp")
+handleGlove("Admin", {"Lobby3", "Application"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Admin")
+handleGlove("Bomb", {"Lobby2"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Bomb")
+handleGlove("Boxer", {"Lobby3", "Barzil"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Boxer")
+handleGlove("UTG", {"Lobby3", "Barzil", "UTG_Obby"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/UTG")
+handleGlove("Warp", {"Lobby2"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Warp")
 
 -- Check if anything loaded
 if not getgenv().sbstew_LoadedAnyTab then
