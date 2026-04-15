@@ -76,8 +76,10 @@ local function handleGlove(name, locations, url)
             -- Choose target section based on ownership
             local targetSection = isOwned and ownedSection or notOwnedSection
             
-            targetSection:CreateButton({
+            -- Buttons are created via Tab, but assigned to a Section
+            BadgeTab:CreateButton({
                 Name = name,
+                SectionParent = targetSection, -- Fixed: Parent the button to the section via Tab
                 Callback = function()
                     -- Check if tab was already created to prevent duplication
                     if not createdTabs[name] then
@@ -112,7 +114,7 @@ handleGlove("Warp", {"Lobby2"}, "https://raw.githubusercontent.com/stewingit/sbs
 if not getgenv().sbstew_LoadedAnyTab then
     local ErrorTab = Window:CreateTab("Unsupported", "circle-alert")
     ErrorTab:CreateParagraph({
-        Title = "Unsupported Experience",
+        Name = "Unsupported Experience",
         Content = "This script does not support the current game (ID: " .. currentPlaceId .. "). Please head over to Slap Battles to use this scripts features!"
     })
 end
