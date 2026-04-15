@@ -49,7 +49,7 @@ local function loadTab(url, name)
 end
 
 --- 5. Tab Loading Section ---
-local isLobby = getgenv().sbstew_Places["Lobby"]
+local isLobby = getgenv().sbstew_Places["Lobby3"]
 local BadgeTab
 
 if isLobby then
@@ -67,7 +67,6 @@ local function handleGlove(name, locations, url)
             BadgeTab:CreateButton({
                 Name = name,
                 Callback = function()
-                    -- Check if tab was already created to prevent duplication
                     if not createdTabs[name] then
                         local newTab = loadTab(url, name)
                         if newTab and typeof(newTab) == "table" then
