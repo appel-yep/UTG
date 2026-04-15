@@ -206,20 +206,44 @@ local BeginButton
 BeginButton = VoodooTab:CreateButton({
     Name = "Begin",
     Callback = function()
-        startTime = tick()
+        local LobbyPath = Workspace:FindFirstChild(LocalPlayer.Name) 
+            and Workspace[LocalPlayer.Name]:FindFirstChild("InLobby")
+        
+        local _, currentGlove = getStats()
 
-        local args = {}
-        game:GetService("ReplicatedStorage"):WaitForChild("Ghostinvisibilityactivated"):FireServer(unpack(args))
+        -- Check if in Arena (InLobby should not exist) and Ghost is equipped
+        if not LobbyPath then
+            if currentGlove == "Ghost" then
+                startTime = tick()
 
-        Stewfield:Notify({
-            Title = "Ability Activated",
-            Content = "The 1 hour timer starts now.",
-            Duration = 4,
-            Image = "check"
-        })
+                local args = {}
+                game:GetService("ReplicatedStorage"):WaitForChild("Ghostinvisibilityactivated"):FireServer(unpack(args))
 
-        if BeginButton then
-            BeginButton:Destroy()
+                Stewfield:Notify({
+                    Title = "Ability Activated",
+                    Content = "The 1 hour timer starts now.",
+                    Duration = 4,
+                    Image = "check"
+                })
+
+                if BeginButton then
+                    BeginButton:Destroy()
+                end
+            else
+                Stewfield:Notify({
+                    Title = "Wrong Glove",
+                    Content = "You must have Ghost equipped!",
+                    Duration = 5,
+                    Image = "circle-alert"
+                })
+            end
+        else
+            Stewfield:Notify({
+                Title = "Error",
+                Content = "You must be in the Arena to begin!",
+                Duration = 5,
+                Image = "circle-alert"
+            })
         end
     end,
 })
