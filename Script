@@ -72,7 +72,7 @@ if isLobby3 or isLobby2 then
     })
 end
 
--- Unified Handle Function (Added destroyOnClick parameter)
+-- Unified Handle Function (Optimized for instant destruction)
 local function handleTab(parentTab, name, locations, url, destroyOnClick)
     if shouldLoad(locations) then
         getgenv().sbstew_LoadedAnyTab = true 
@@ -81,17 +81,20 @@ local function handleTab(parentTab, name, locations, url, destroyOnClick)
         NewButton = parentTab:CreateButton({
             Name = name,
             Callback = function()
-                if not createdTabs[name] then
-                    local newTab = loadTab(url, name)
-                    if newTab and typeof(newTab) == "table" then
-                        createdTabs[name] = newTab
-                    end
-                end
-                
-                -- Destroy logic for Misc Tab only
+                -- 1. Handle UI destruction instantly
                 if destroyOnClick and NewButton then
                     NewButton:Destroy()
                 end
+
+                -- 2. Load heavy content in background to prevent UI freezing
+                task.spawn(function()
+                    if not createdTabs[name] then
+                        local newTab = loadTab(url, name)
+                        if newTab and typeof(newTab) == "table" then
+                            createdTabs[name] = newTab
+                        end
+                    end
+                end)
             end,
         })
     end
