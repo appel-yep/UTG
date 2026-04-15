@@ -8,49 +8,91 @@ local PlateTab = Window:CreateTab("Plate Glove", "disc")
 PlateTab:CreateLabel("Plate Glove Buttons")
 
 -- 1. Go to Plate Place Button
-local slappingActive = false
 PlateTab:CreateButton({
     Name = "Go to plate place",
     Callback = function()
         if Places["Lobby3"] then    
+            getgenv().PlateSlapActive = false
+            task.wait(0.1)
+
             local character = game.Players.LocalPlayer.Character
             local hum = character:FindFirstChildOfClass("Humanoid")
             local rootPart = character:FindFirstChild("HumanoidRootPart")
-            local target = workspace.Arena.Plate
-            
-            if hum then
-                hum:MoveTo(workspace.Lobby.Teleport1.Position)
-                task.wait(0.3)
-                hum:MoveTo(rootPart.Position)
+            local portal = workspace.Lobby.Teleport1
+            local targetPlate = workspace.Arena.Plate
+            local targetText = workspace.Arena.Plate.Sign.Text
+
+            -- 1. Walk to Portal
+            if hum and portal then
+                hum:MoveTo(portal.Position)
+                local entered = false
+                local connection
+                connection = portal.Touched:Connect(function(hit)
+                    if hit:IsDescendantOf(character) then
+                        entered = true
+                        connection:Disconnect()
+                    end
+                end)
+                
+                local start = tick()
+                repeat task.wait() until entered or (tick() - start > 5)
+                task.wait(0.5) 
             end
-            
-            task.wait(1)
-            
-            if rootPart and hum and target then
-                hum:ChangeState(Enum.HumanoidStateType.Jumping)
-                task.wait(0.05)
-                rootPart.CFrame = target.CFrame
+
+            -- 2. Tp to plate
+            if hum and rootPart and targetPlate and targetText then
+                hum.Jump = true 
+                task.wait(0.1)
+                
+                local platePos = targetPlate.Position
+                local signPos = targetText.Position
+                
+                rootPart.CFrame = CFrame.lookAt(
+                    Vector3.new(platePos.X, platePos.Y + 3, platePos.Z), 
+                    Vector3.new(signPos.X, platePos.Y + 3, signPos.Z)
+                )
+                task.wait(0.2)
             end
-            
-            task.wait(1)
-            
-            -- Start Auto Slapping
-            slappingActive = true
+
+            -- 3. Auto Slap
+            getgenv().PlateSlapActive = true
             Stewfield:Notify({
                 Title = "Auto Slap",
-                Content = "Started slapping the plate sign...",
+                Content = "Started slapping (Invisible Reach Active)",
                 Duration = 3,
                 Image = "info",
             })
-            
+
             task.spawn(function()
-                while slappingActive do
+                while getgenv().PlateSlapActive do
                     local char = game.Players.LocalPlayer.Character
-                    if char then
-                        local tool = char:FindFirstChildOfClass("Tool")
-                        if tool then
-                            tool:Activate()
+                    local root = char and char:FindFirstChild("HumanoidRootPart")
+                    local tool = char and char:FindFirstChildOfClass("Tool")
+                    
+                    -- Check if player died to stop loop
+                    if not char or not char:FindFirstChild("Humanoid") or char.Humanoid.Health <= 0 then
+                        getgenv().PlateSlapActive = false
+                        break
+                    end
+
+                    -- Reach
+                    if tool then
+                        local handle = tool:FindFirstChild("Handle") or tool:FindFirstChildOfClass("Part")
+                        if handle then
+                            handle.Size = Vector3.new(15, 15, 15)
+                            handle.CanCollide = false
+                            handle.Transparency = 1
                         end
+                        tool:Activate()
+                    end
+
+                    -- Constant Lock
+                    if root and targetText then
+                        local signPos = targetText.Position
+                        root.CFrame = CFrame.lookAt(
+                            root.Position, 
+                            Vector3.new(signPos.X, root.Position.Y, signPos.Z)
+                        )
                     end
                     task.wait(0.1)
                 end
@@ -87,7 +129,7 @@ PlateTab:CreateButton({
                     if workspace:GetAttribute("Completed") == true then
                         Stewfield:Notify({
                             Title = "Notification",
-                            Content = "Done",
+                            Content = "Task finished!",
                             Duration = 5,
                             Image = "check",
                         })
