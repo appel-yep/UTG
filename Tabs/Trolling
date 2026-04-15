@@ -1,0 +1,132 @@
+local TrollingTab = getgenv().sbstew_Window:CreateTab("Trolling", "laugh")
+local Stewfield = getgenv().sbstew_Stewfield
+
+-- Services
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local LocalPlayer = Players.LocalPlayer
+local ResetRemote = ReplicatedStorage:WaitForChild("SelfDestruct", 5) or ReplicatedStorage:WaitForChild("Reset", 5)
+
+-- State Variables
+local TrollCount = 1
+local TrollingActive = false
+local SelectedTroll = "cube of death"
+
+TrollingTab:CreateLabel("Swapper Trolling")
+
+-- Slider for Iterations
+TrollingTab:CreateSlider({
+    Name = "Amount of Trolls",
+    Range = {1, 50},
+    Increment = 1,
+    Suffix = " Times",
+    CurrentValue = 1,
+    Callback = function(Value)
+        TrollCount = Value
+    end,
+})
+
+-- Dropdown for Selection
+TrollingTab:CreateDropdown({
+    Name = "Type",
+    Options = {"cube of death"},
+    CurrentOption = "cube of death",
+    MultipleOptions = false,
+    Callback = function(Option)
+        SelectedTroll = Option[1]
+    end,
+})
+
+-- The Main Logic Function
+local function RunTrollLogic()
+    local char = LocalPlayer.Character
+    if not char then return end
+    
+    local stats = LocalPlayer:FindFirstChild("leaderstats")
+    local glove = (stats and stats:FindFirstChild("Glove")) and stats.Glove.Value or ""
+    
+    -- 1. Check
+    if glove ~= "Swapper" then
+        Stewfield:Notify({
+            Title = "Glove Required",
+            Content = "You must have Swapper equipped to use this!",
+            Duration = 5,
+            Image = "circle-alert"
+        })
+        return
+    end
+
+    -- 2. Walk to Portal
+    local portal = Workspace.Lobby:FindFirstChild("Teleport1")
+    if portal and char:FindFirstChild("Humanoid") then
+        char.Humanoid:MoveTo(portal.Position)
+        
+        -- 3. Wait for Touch Interest / Teleport
+        repeat task.wait(0.1) until (char:FindFirstChild("InLobby") == nil) or not TrollingActive
+        
+        if not TrollingActive then return end
+        
+        -- 4. Initial Delay before Script
+        task.wait(0.5)
+
+        -- 5. Execute your Cube of Death Script
+        local cubePath = Workspace.Arena.CubeOfDeathArea:FindFirstChild("the cube of death(i heard it kills)")
+        local remote = ReplicatedStorage:WaitForChild("SLOC", 5)
+        local rootPart = char:FindFirstChild("HumanoidRootPart")
+
+        for i = 1, TrollCount do
+            if not TrollingActive then break end
+            
+            print("Troll Cycle: " .. i)
+            
+            if cubePath and rootPart then
+                -- Disable Kill Part
+                cubePath.CanTouch = false
+                if cubePath:FindFirstChild("Part") then
+                    cubePath.Part.CanTouch = false
+                end
+
+                -- Teleport
+                rootPart.CFrame = cubePath.CFrame * CFrame.new(0, 5, 0)
+                task.wait(0.5)
+
+                -- Fire Remote
+                if remote then
+                    remote:FireServer()
+                end
+            end
+
+            if i < TrollCount then
+                task.wait(7)
+            end
+        end
+    end
+end
+
+-- Toggle to Start/Stop
+TrollingTab:CreateToggle({
+    Name = "Swapper Trolling",
+    CurrentValue = false,
+    Flag = "TrollToggle",
+    Callback = function(Value)
+        TrollingActive = Value
+        
+        if TrollingActive then
+            task.spawn(RunTrollLogic)
+        else
+            -- Reset Character if turned off
+            if ResetRemote then
+                ResetRemote:FireServer()
+            else
+                if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+                    LocalPlayer.Character.Humanoid.Health = 0
+                end
+            end
+            print("Trolling Stopped. Character Reset.")
+        end
+    end,
+})
+
+return TrollingTab
