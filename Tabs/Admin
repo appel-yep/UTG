@@ -13,7 +13,7 @@ AdminTab:CreateLabel("Admin Glove Buttons")
 AdminTab:CreateButton({
     Name = "Teleport to application button",
     Callback = function()
-        if Places["Lobby"] then
+        if Places["Lobby3"] then
             game.ReplicatedStorage.Assets.Retro.Parent = game.Workspace
             task.wait(0.1)
             local root = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
@@ -32,7 +32,7 @@ AdminTab:CreateButton({
 })
 
 -- 2. Final Room TP
-local FinalRoomButton -- Variable to hold the button object
+local FinalRoomButton
 FinalRoomButton = AdminTab:CreateButton({
     Name = "Tp to the final room",
     Callback = function()
