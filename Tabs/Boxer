@@ -11,7 +11,7 @@ BoxerTab:CreateLabel("Boxer Glove Buttons")
 BoxerTab:CreateButton({
     Name = "Tp to Barzil portal",
     Callback = function()
-        if Places["Lobby"] then    
+        if Places["Lobby3"] then    
             firetouchinterest(game:GetService("Players").LocalPlayer.Character:WaitForChild("Head"), Workspace.Lobby.brazil.portal, 0) 
             task.wait(0.1) 
             firetouchinterest(game:GetService("Players").LocalPlayer.Character:WaitForChild("Head"), Workspace.Lobby.brazil.portal, 1)
