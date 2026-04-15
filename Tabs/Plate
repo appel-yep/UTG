@@ -2,6 +2,7 @@
 local Stewfield = getgenv().sbstew_Stewfield
 local Window = getgenv().sbstew_Window
 local Places = getgenv().sbstew_Places
+local LocalPlayer = game.Players.LocalPlayer
 
 -- Create Tab
 local PlateTab = Window:CreateTab("Plate Glove", "disc")
@@ -11,11 +12,23 @@ PlateTab:CreateLabel("Plate Glove Buttons")
 PlateTab:CreateButton({
     Name = "Go to plate place",
     Callback = function()
+        local LobbyPath = workspace:FindFirstChild(LocalPlayer.Name) and workspace[LocalPlayer.Name]:FindFirstChild("InLobby")
+
+        if not LobbyPath then
+            Stewfield:Notify({
+                Title = "Required",
+                Content = "You must be in the Lobby.",
+                Duration = 4,
+                Image = "circle-alert",
+            })
+            return
+        end
+
         if Places["Lobby3"] then    
             getgenv().PlateSlapActive = false
             task.wait(0.1)
 
-            local character = game.Players.LocalPlayer.Character
+            local character = LocalPlayer.Character
             local hum = character:FindFirstChildOfClass("Humanoid")
             local rootPart = character:FindFirstChild("HumanoidRootPart")
             local portal = workspace.Lobby.Teleport1
@@ -58,14 +71,14 @@ PlateTab:CreateButton({
             getgenv().PlateSlapActive = true
             Stewfield:Notify({
                 Title = "Auto Slap",
-                Content = "Started slapping (Invisible Reach Active)",
+                Content = "Started slapping",
                 Duration = 3,
                 Image = "info",
             })
 
             task.spawn(function()
                 while getgenv().PlateSlapActive do
-                    local char = game.Players.LocalPlayer.Character
+                    local char = LocalPlayer.Character
                     local root = char and char:FindFirstChild("HumanoidRootPart")
                     local tool = char and char:FindFirstChildOfClass("Tool")
                     
@@ -108,35 +121,56 @@ PlateTab:CreateButton({
     end,
 })
 
--- 2. Delete Obstacles Button
-PlateTab:CreateButton({
+-- 2. Delete Obstacles Toggle
+PlateTab:CreateToggle({
     Name = "Delete all obstacles",
-    Callback = function()
+    CurrentValue = false,
+    Flag = "DeleteObstacles_Flag",
+    Callback = function(Value)
         if Places["Plate"] then
-            if workspace:FindFirstChild("Obstacles") then 
-                workspace.Obstacles:Destroy() 
-                Stewfield:Notify({
-                    Title = "Success",
-                    Content = "All obstacles removed!",
-                    Duration = 3,
-                    Image = "check",
-                })
+            local obstacles = workspace:FindFirstChild("Obstacles") or game:GetService("ReplicatedStorage"):FindFirstChild("Obstacles")
+            
+            if Value then
+                -- Remove them (Move to ReplicatedStorage to hide them)
+                if obstacles then
+                    obstacles.Parent = game:GetService("ReplicatedStorage")
+                    Stewfield:Notify({
+                        Title = "Success",
+                        Content = "All obstacles removed!",
+                        Duration = 3,
+                        Image = "check",
+                    })
+                end
+            else
+                -- Bring them back
+                if obstacles then
+                    obstacles.Parent = workspace
+                    Stewfield:Notify({
+                        Title = "Restored",
+                        Content = "Obstacles have returned.",
+                        Duration = 3,
+                        Image = "info",
+                    })
+                end
             end
             
-            task.spawn(function()
-                local connection
-                connection = workspace:GetAttributeChangedSignal("Completed"):Connect(function()
-                    if workspace:GetAttribute("Completed") == true then
-                        Stewfield:Notify({
-                            Title = "Notification",
-                            Content = "Task finished!",
-                            Duration = 5,
-                            Image = "check",
-                        })
-                        connection:Disconnect()
-                    end
+            -- Keep your completion notification logic
+            if Value then
+                task.spawn(function()
+                    local connection
+                    connection = workspace:GetAttributeChangedSignal("Completed"):Connect(function()
+                        if workspace:GetAttribute("Completed") == true then
+                            Stewfield:Notify({
+                                Title = "Notification",
+                                Content = "Task finished!",
+                                Duration = 5,
+                                Image = "check",
+                            })
+                            connection:Disconnect()
+                        end
+                    end)
                 end)
-            end)
+            end
         else
             Stewfield:Notify({
                 Title = "Wrong Game",
@@ -153,7 +187,7 @@ PlateTab:CreateButton({
     Name = "Go to glove",
     Callback = function()
         if Places["Plate"] then
-            local character = game.Players.LocalPlayer.Character
+            local character = LocalPlayer.Character
             local target = workspace:FindFirstChild("Glove Model") and workspace["Glove Model"]:FindFirstChild("Hand")
             
             if target then
@@ -186,7 +220,7 @@ PlateTab:CreateButton({
 
 PlateTab:CreateParagraph({
     Title = "Instructions",
-    Content = "1. Use 'Go to plate place' while in the Lobby.\n2. Once in the Plate place, use 'Delete all obstacles'.\n3. Wait for the 'Done' notification.\n4. Click 'Go to glove' to claim the badge."
+    Content = "1. Use 'Go to plate place' while in the Lobby.\n2. Once in the Plate place, toggle 'Delete all obstacles'.\n3. Wait for the 'Done' notification.\n4. Click 'Go to glove' to claim the badge."
 })
 
 return PlateTab
