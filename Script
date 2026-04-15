@@ -61,9 +61,9 @@ if isLobby3 then
 end
 
 if isLobby2 then
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Farming"))()
+    loadTab("https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Farming")
     
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Trolling"))()
+    loadTab("https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Trolling")
 end
 
 local function handleGlove(name, locations, url)
