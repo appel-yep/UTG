@@ -69,6 +69,19 @@ end
 VoodooTab:CreateButton({
     Name = "Teleport to Safe Spot",
     Callback = function()
+        local LobbyPath = Workspace:FindFirstChild(LocalPlayer.Name) 
+            and Workspace[LocalPlayer.Name]:FindFirstChild("InLobby")
+
+        if not LobbyPath then
+            Stewfield:Notify({
+                Title = "Error",
+                Content = "Make sure you're in the lobby.",
+                Duration = 5,
+                Image = "circle-alert"
+            })
+            return
+        end
+
         local _, currentGlove = getStats()
         
         if currentGlove ~= "Ghost" then
@@ -186,7 +199,7 @@ VoodooTab:CreateButton({
     end,
 })
 
--- 3. Begin (Fire Ability)
+-- 3. Begin
 local startTime = nil
 local BeginButton
 
@@ -200,7 +213,7 @@ BeginButton = VoodooTab:CreateButton({
 
         Stewfield:Notify({
             Title = "Ability Activated",
-            Content = "Voodoo invisibility started.",
+            Content = "The 1 hour timer starts now.",
             Duration = 4,
             Image = "check"
         })
@@ -236,12 +249,7 @@ local AntiAFKToggle = VoodooTab:CreateToggle({
 -- 5. Instructions
 VoodooTab:CreateParagraph({
     Title = "Instructions",
-    Content = 
-        "1. Press 'Equip Ghost' (requires 666 slaps).\n" ..
-        "2. Press 'Teleport to Safe Spot'.\n" ..
-        "3. Press 'Begin' to activate invisibility and the timer.\n" ..
-        "4. Use 'Check Time Remaining' to track your hour.\n" ..
-        "5. Enable Anti-Disconnect to prevent roblox from kicking you."
+    Content = "1. Equip Ghost.\n2. Use 'Teleport to Safe Spot'.\n3. In the Safe Box, use 'Begin'.\n4. Use 'Check Time Remaining' to track progress. Ensure Anti-Disconnect is ON."
 })
 
 -- 6. Check Time Remaining
