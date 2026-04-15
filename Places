@@ -2,7 +2,9 @@ local currentPlaceId = game.PlaceId
 
 -- Define Places Globally
 getgenv().sbstew_Places = {
-    ["Lobby"]       = (currentPlaceId == 6403373529 or currentPlaceId == 9015014224 or currentPlaceId == 11520107397),
+    ["Lobby"]       = (currentPlaceId == 6403373529), -- normal lobby
+    ["Lobby2"]      = (currentPlaceId == 6403373529 or currentPlaceId == 9015014224), -- normal and no-oneshots
+    ["Lobby3"]      = (currentPlaceId == 6403373529 or currentPlaceId == 9015014224 or currentPlaceId == 11520107397), -- ks also
     ["Barzil"]      = (currentPlaceId == 7234087065),
     ["UTG_Obby"]    = (currentPlaceId == 115782629143468),
     ["Application"] = (currentPlaceId == 16034567693),
