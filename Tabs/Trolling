@@ -24,29 +24,26 @@ end
 -- Tab Creation
 local TrollingTab = Window:CreateTab("Trolling", "laugh")
 
--- Death Handler Logic
-local function MonitorDeath(character)
-    local humanoid = character:WaitForChild("Humanoid", 10)
-    if humanoid then
-        humanoid.Died:Connect(function()
-            if TrollingActive then
+local TrollingToggle
+
+-- Lobby Check Logic
+task.spawn(function()
+    while task.wait(0.5) do
+        if TrollingActive then
+            local LobbyPath = Workspace:FindFirstChild(LocalPlayer.Name) and Workspace[LocalPlayer.Name]:FindFirstChild("InLobby")
+            if LobbyPath then
                 TrollingActive = false
-                -- This visually updates the toggle in the UI and stops the loop logic
-                TrollingTab:Set({Flag = "TrollToggle", Value = false})
+                if TrollingToggle then TrollingToggle:Set(false) end
                 Stewfield:Notify({
                     Title = "Script Stopped",
-                    Content = "Character died. Trolling disabled.",
+                    Content = "Back in lobby. Trolling disabled.",
                     Duration = 3,
-                    Image = "skull"
+                    Image = "map"
                 })
             end
-        end)
+        end
     end
-end
-
--- Initialize death monitoring for current and future characters
-if LocalPlayer.Character then task.spawn(MonitorDeath, LocalPlayer.Character) end
-LocalPlayer.CharacterAdded:Connect(MonitorDeath)
+end)
 
 -- Main Logic Function
 local function RunTrollLogic()
@@ -57,8 +54,8 @@ local function RunTrollLogic()
     
     -- Ownership/Equip Check
     if glove ~= "Swapper" then
-        TrollingTab:Set({Flag = "TrollToggle", Value = false})
-        Stewfield:Notify({
+        if TrollingToggle then TrollingToggle:Set(false) end
+         Stewfield:Notify({
             Title = "Glove Required",
             Content = "You must have Swapper equipped to use this!",
             Duration = 5,
@@ -107,6 +104,21 @@ local function RunTrollLogic()
                 task.wait(7)
             end
         end
+        
+        -- Finish Tasks: Reset and turn off toggle
+        if TrollingActive then
+            TrollingActive = false
+            if TrollingToggle then TrollingToggle:Set(false) end
+            
+            -- Reset Character after finishing iterations
+            if ResetRemote then
+                ResetRemote:FireServer()
+            else
+                if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+                    LocalPlayer.Character.Humanoid.Health = 0
+                end
+            end
+        end
     end
 end
 
@@ -134,7 +146,7 @@ TrollingTab:CreateSlider({
     end,
 })
 
-TrollingTab:CreateToggle({
+TrollingToggle = TrollingTab:CreateToggle({
     Name = "Swapper Trolling",
     CurrentValue = false,
     Flag = "TrollToggle",
@@ -144,9 +156,9 @@ TrollingTab:CreateToggle({
         if TrollingActive then
             task.spawn(RunTrollLogic)
         else
-            -- Check if character is still alive before forcing a reset 
-            -- (prevents double-reset if the death handler already stopped it)
-            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") and LocalPlayer.Character.Humanoid.Health > 0 then
+            -- Manual disable: Check if in arena to reset
+            local LobbyPath = Workspace:FindFirstChild(LocalPlayer.Name) and Workspace[LocalPlayer.Name]:FindFirstChild("InLobby")
+            if not LobbyPath and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") and LocalPlayer.Character.Humanoid.Health > 0 then
                 if ResetRemote then
                     ResetRemote:FireServer()
                 else
@@ -162,9 +174,9 @@ TrollingTab:CreateParagraph({
     Title = "How to use",
     Content = "• Equip the Swapper glove in the lobby.\n" ..
               "• Set the amount of times you wish to loop the teleport.\n" ..
-              "• Enable 'Swapper Trolling' to begin the automation.\n" ..
-              "• If you die, the script will automatically turn off.\n" ..
-              "• Manually disabling the toggle will reset your character."
+              "• Enable 'Swapper Trolling' to begin.\n" ..
+              "• The script turns off automatically if you die or finish the tasks.\n" ..
+              "• Manual disable will reset your character."
 })
 
 return TrollingTab
