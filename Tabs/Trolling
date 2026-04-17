@@ -13,6 +13,19 @@ local TrollingActive = false
 local SelectedTroll = "cube of death"
 local SelectedTarget = "Random"
 local ResetRemote = ReplicatedStorage:WaitForChild("SelfDestruct", 5) or ReplicatedStorage:WaitForChild("Reset", 5)
+local SLOC_Remote = ReplicatedStorage:WaitForChild("SLOC", 5)
+
+-- Remote Protection Hook
+local oldNamecall
+oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
+    local method = getnamecallmethod()
+    if TrollingActive and self == SLOC_Remote and (method == "FireServer" or method == "fireServer") then
+        if not checkcaller() then
+            return nil
+        end
+    end
+    return oldNamecall(self, ...)
+end)
 
 -- Helper logic for Stats
 local function getStats()
@@ -122,8 +135,6 @@ local function RunTrollLogic()
     -- 3. Execution Loop
     task.wait(0.5)
 
-    local remote = ReplicatedStorage:WaitForChild("SLOC", 5)
-    
     -- Creation of Void Part if selected
     local voidPart
     if SelectedTroll == "void" then
@@ -158,17 +169,24 @@ local function RunTrollLogic()
 
         -- Wait for Closest Player (if specific target selected)
         if SelectedTarget ~= "Random" then
+            Stewfield:Notify({
+                Title = "Waiting",
+                Content = "Waiting for " .. SelectedTarget .. " to be the closest",
+                Duration = 999, -- Stay until manually closed or ability fires
+                Image = "clock"
+            })
+            
             repeat
                 task.wait(0.05)
             until getClosestPlayerName() == SelectedTarget or not TrollingActive or not Players:FindFirstChild(SelectedTarget)
+            
+            Stewfield:Notify({Title = "Target Found", Content = "Executing swap...", Duration = 1, Image = "check"})
         end
 
-        -- Delay before ability fire
         task.wait(0.3)
 
-        -- Fire Ability
-        if remote and TrollingActive then
-            remote:FireServer()
+        if SLOC_Remote and TrollingActive then
+            SLOC_Remote:FireServer()
         end
         
         if i < TrollCount then
@@ -198,7 +216,7 @@ TrollingTab:CreateLabel("Swapper Trolling")
 TrollingTab:CreateDropdown({
     Name = "Type",
     Options = {"cube of death", "void"},
-    CurrentOption = "cube of death",
+    CurrentOption = "void",
     MultipleOptions = false,
     Callback = function(Option)
         SelectedTroll = Option[1]
@@ -253,9 +271,9 @@ TrollingTab:CreateLabel("Instructions")
 TrollingTab:CreateParagraph({
     Title = "How to use",
     Content = "• Equip Swapper in the lobby.\n" ..
-              "• Select Target: 'Random' swaps instantly, a specific name waits until they are closest to you.\n" ..
-              "• Your character will anchor to prevent movement during the swap process.\n" ..
-              "• Includes a 0.3s delay after teleporting before firing the ability."
+              "• Select Target: Waits until the target is closest to you before doing the ability.\n" ..
+              "• Once the loop has finished you will be reset.\n" ..
+              "• Change the amount of times you troll by using the slider."
 })
 
 return TrollingTab
