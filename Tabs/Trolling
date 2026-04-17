@@ -166,7 +166,7 @@ local function RunTrollLogic()
     for i = 1, TrollCount do
         if not TrollingActive then break end
 
-        -- Step A: Position User
+        -- Step A: Position User (Teleport)
         if SelectedTroll == "cube of death" then
             local cubePath = Workspace.Arena.CubeOfDeathArea:FindFirstChild("the cube of death(i heard it kills)")
             if cubePath then
@@ -247,15 +247,30 @@ local function RunTrollLogic()
             end
         end
 
-if i < TrollCount then task.wait(6) end
-    end
 
         -- Step C: Trigger Swap
         task.wait(0.3)
         if SLOC_Remote and TrollingActive then
             SLOC_Remote:FireServer()
         end
-    
+
+        -- Step D: Post-Swap Sequence (Wait 0.5 -> Teleport -> Wait 5.5)
+        if i < TrollCount then 
+            task.wait(0.5)
+            
+            -- Teleport again immediately after 0.5s wait
+            if SelectedTroll == "cube of death" then
+                local cubePath = Workspace.Arena.CubeOfDeathArea:FindFirstChild("the cube of death(i heard it kills)")
+                if cubePath then rootPart.CFrame = cubePath.CFrame * CFrame.new(0, 5, 0) end
+            elseif SelectedTroll == "void" then
+                local targetPos = VoidPositions[math.random(1, #VoidPositions)]
+                rootPart.CFrame = CFrame.new(targetPos) * CFrame.new(0, 5, 0)
+            end
+
+            task.wait(5.5) -- Wait the remainder of the 6 seconds
+        end
+    end
+
     for _, v in ipairs(voidParts) do v:Destroy() end
     
     if TrollingActive then
