@@ -139,12 +139,6 @@ local function RunTrollLogic()
 
     for i = 1, TrollCount do
         if not TrollingActive then break end
-        
-        -- Start Freeze sequence
-        hum.WalkSpeed = 0
-        hum.JumpPower = 0
-        rootPart.Anchored = true
-        task.wait(0.1)
 
         -- Teleport First
         if SelectedTroll == "cube of death" then
@@ -177,11 +171,6 @@ local function RunTrollLogic()
             remote:FireServer()
         end
         
-        -- Unfreeze
-        rootPart.Anchored = false
-        hum.WalkSpeed = 16
-        hum.JumpPower = 50
-
         if i < TrollCount then
             task.wait(7)
         end
