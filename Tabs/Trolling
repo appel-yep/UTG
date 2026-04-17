@@ -10,7 +10,7 @@ local MarketPlaceService = game:GetService("MarketplaceService")
 -- Configuration & State
 local TrollCount = 1
 local TrollingActive = false
-local SelectedTroll = "cube of death"
+local SelectedTroll = "void"
 local SelectedTarget = "Random"
 local ResetRemote = ReplicatedStorage:WaitForChild("SelfDestruct", 5) or ReplicatedStorage:WaitForChild("Reset", 5)
 local SLOC_Remote = ReplicatedStorage:WaitForChild("SLOC", 5)
@@ -270,10 +270,11 @@ TrollingToggle = TrollingTab:CreateToggle({
 TrollingTab:CreateLabel("Instructions")
 TrollingTab:CreateParagraph({
     Title = "How to use",
-    Content = "• Equip Swapper in the lobby.\n" ..
-              "• Select Target: Waits until the target is closest to you before doing the ability.\n" ..
-              "• Once the loop has finished you will be reset.\n" ..
-              "• Change the amount of times you troll by using the slider."
+    Content = "• Equip the Swapper glove in the lobby.\n" ..
+              "• Set the amount of times you wish to loop the troll.\n" ..
+              "• Enter the arena and turn on 'Swapper Trolling' to begin.\n" ..
+              "• Once the script is finished you will be reset to prevent bans.\n" ..
+              "• The script stops when you finish or return to the lobby."
 })
 
 return TrollingTab
