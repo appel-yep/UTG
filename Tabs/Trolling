@@ -145,7 +145,7 @@ local function RunTrollLogic()
     end
 
     -- Initial Delay
-    task.wait(4.5)
+    task.wait(2.5)
 
     -- Creation of Void Parts
     local voidParts = {}
@@ -247,14 +247,14 @@ local function RunTrollLogic()
             end
         end
 
+if i < TrollCount then task.wait(6) end
+    end
+
         -- Step C: Trigger Swap
         task.wait(0.3)
         if SLOC_Remote and TrollingActive then
             SLOC_Remote:FireServer()
         end
-
-        if i < TrollCount then task.wait(7) end
-    end
     
     for _, v in ipairs(voidParts) do v:Destroy() end
     
