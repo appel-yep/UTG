@@ -5,6 +5,7 @@ local Places = getgenv().sbstew_Places
 
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
+local LocalPlayer = Players.LocalPlayer
 
 -- Variables for Logic
 local leverStartTime = nil
@@ -38,21 +39,49 @@ local StatusPara = CounterTab:CreateParagraph({
     Content = string.format("Spawned: %s\nCode: %s", keypadStatus, currentCode)
 })
 
--- 1. Go to Maze (Keypad TP + Auto Type)
+-- Dynamic Update Loop for Paragraph
+task.spawn(function()
+    while task.wait(1) do
+        local status, code = getKeypadInfo()
+        StatusPara:Set({
+            Title = "Keypad Status",
+            Content = string.format("Spawned: %s\nCode: %s", status, code)
+        })
+        keypadStatus = status
+        currentCode = code
+    end
+end)
+
+-- 1. Go to Maze
 CounterTab:CreateButton({
     Name = "Go to maze",
     Callback = function()
         if Places["Lobby3"] then
             local keypad = Workspace:FindFirstChild("Keypad")
             if keypad then
-                -- Teleport to Keypad
-                local lp = Players.LocalPlayer
-                local character = lp.Character
-                if character and character:FindFirstChild("HumanoidRootPart") then
-                    character.HumanoidRootPart.CFrame = keypad:GetPivot() * CFrame.new(0, 0, -3)
+                local character = LocalPlayer.Character
+                local humanoid = character and character:FindFirstChild("Humanoid")
+                local hrp = character and character:FindFirstChild("HumanoidRootPart")
+                
+                if hrp and humanoid then
+                    -- Lobby Check: If "InLobby" exists, walk to portal first
+                    if character:FindFirstChild("InLobby") then
+                        humanoid:MoveTo(Workspace.Lobby.Teleport1.Position)
+                        humanoid.MoveToFinished:Wait()
+                        task.wait(0.9)
+                    end
+                    
+                    -- Teleport to Keypad
+                    hrp.CFrame = keypad:GetPivot() * CFrame.new(0, 0, -3)
+                    task.wait(0.5)
+                    
+                    -- Reset Keypad first
+                    if keypad.Buttons:FindFirstChild("Reset") then
+                        fireclickdetector(keypad.Buttons.Reset.ClickDetector)
+                        task.wait(0.2)
+                    end
                     
                     -- Logic to enter code
-                    task.wait(0.5)
                     local codeToEnter = currentCode
                     for i = 1, #codeToEnter do
                         local digit = string.sub(codeToEnter, i, i)
@@ -207,8 +236,8 @@ CounterTab:CreateButton({
             if maze then
                 local parts = maze:GetChildren()
                 local part = parts[673] -- Using index 673 per logic provided
-                if part and Players.LocalPlayer.Character then
-                    local hrp = Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if part and LocalPlayer.Character then
+                    local hrp = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
                     if hrp then
                         hrp.CFrame = part.CFrame
                         Stewfield:Notify({
