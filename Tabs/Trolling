@@ -17,10 +17,10 @@ local SLOC_Remote = ReplicatedStorage:WaitForChild("SLOC", 5)
 
 -- Void Coordinates
 local VoidPositions = {
-    Vector3.new(101, -107, 24),
-    Vector3.new(-3.6, -107, 115.4),
-    Vector3.new(-116.3, -107, 0.5),
-    Vector3.new(-4.7, -107, -111.1)
+    Vector3.new(101, -107, 24),    -- Original
+    Vector3.new(-3.6, -107, 115.4), -- Pos 1
+    Vector3.new(-116.3, -107, 0.5), -- Pos 2
+    Vector3.new(-4.7, -107, -111.1) -- Pos 3
 }
 
 -- Remote Protection Hook
@@ -43,6 +43,29 @@ local function getStats()
     return slaps, currentGlove
 end
 
+-- Full Rock Sensing Logic from provided example
+local function IsValidTarget(p)
+    local Character = p.Character
+    if not Character then return false end
+    
+    local Humanoid = Character:FindFirstChildWhichIsA("Humanoid")
+    local Root = Character:FindFirstChild("HumanoidRootPart")
+    if not Humanoid or not Root or Humanoid.Health <= 0 then return false end
+
+    -- Rock Logic from Example
+    local InLobby = Character:FindFirstChild("InLobby")
+    local Rock = Character:FindFirstChild("rock") or Character:FindFirstChild("megarock")
+    local Reverse = Character:FindFirstChild("Reversed")
+    local Skull = Character:FindFirstChild("Skull")
+    local Counter = Character:FindFirstChild("Counterd")
+    local Steve = Character:FindFirstChild("stevebody")
+    local Visible = Character:FindFirstChild("CarKeysCar") or (Character:FindFirstChild("Head") or Character:FindFirstChildWhichIsA("BasePart")).Transparency == 0
+    local BuddyBox = Character.Head:FindFirstChild("BuddyBox")
+    local Ragdolled = Character:FindFirstChild("FakePart Right Arm")
+
+    return (not Rock and not Steve and not InLobby)
+end
+
 -- Helper logic to find the closest valid player name
 local function getClosestPlayerName()
     local closestName = nil
@@ -52,19 +75,11 @@ local function getClosestPlayerName()
     if not myRoot then return nil end
 
     for _, p in pairs(Players:GetPlayers()) do
-        local char = p.Character
-        if p ~= LocalPlayer and char and char:FindFirstChild("HumanoidRootPart") then
-            -- Rock Logic Check
-            local isRock = char:FindFirstChild("rock") or char:FindFirstChild("megarock")
-            local isRagdolled = char:FindFirstChild("FakePart Right Arm")
-            local isInLobby = char:FindFirstChild("InLobby")
-            
-            if not isRock and not isRagdolled and not isInLobby then
-                local dist = (myRoot.Position - char.HumanoidRootPart.Position).Magnitude
-                if dist < shortestDist then
-                    shortestDist = dist
-                    closestName = p.Name
-                end
+        if p ~= LocalPlayer and IsValidTarget(p) then
+            local dist = (myRoot.Position - p.Character.HumanoidRootPart.Position).Magnitude
+            if dist < shortestDist then
+                shortestDist = dist
+                closestName = p.Name
             end
         end
     end
@@ -115,9 +130,8 @@ end)
 -- Main Logic Function
 local function RunTrollLogic()
     local char = LocalPlayer.Character
-    local hum = char and char:FindFirstChild("Humanoid")
     local rootPart = char and char:FindFirstChild("HumanoidRootPart")
-    if not char or not hum or not rootPart then return end
+    if not char or not rootPart then return end
     
     local _, glove = getStats()
     local LobbyPath = Workspace:FindFirstChild(LocalPlayer.Name) and Workspace[LocalPlayer.Name]:FindFirstChild("InLobby")
@@ -136,6 +150,7 @@ local function RunTrollLogic()
         return
     end
 
+    -- Initial 3 Second Delay
     task.wait(3)
 
     -- Creation of Void Parts
@@ -143,7 +158,7 @@ local function RunTrollLogic()
     if SelectedTroll == "void" then
         for i, pos in ipairs(VoidPositions) do
             local p = Instance.new("Part")
-            p.Name = "S5Void_" .. i
+            p.Name = "S5_Void_" .. i
             p.Anchored = true
             p.CanCollide = true
             p.Transparency = 0.5
@@ -157,7 +172,7 @@ local function RunTrollLogic()
     for i = 1, TrollCount do
         if not TrollingActive then break end
 
-        -- Step A: Positioning
+        -- Step A: Position User
         if SelectedTroll == "cube of death" then
             local cubePath = Workspace.Arena.CubeOfDeathArea:FindFirstChild("the cube of death(i heard it kills)")
             if cubePath then
@@ -166,8 +181,8 @@ local function RunTrollLogic()
                 rootPart.CFrame = cubePath.CFrame * CFrame.new(0, 5, 0)
             end
         elseif SelectedTroll == "void" then
+            -- Find the best plate
             local targetPos = VoidPositions[1]
-            
             if SelectedTarget == "Random" then
                 targetPos = VoidPositions[math.random(1, #VoidPositions)]
             else
@@ -189,13 +204,34 @@ local function RunTrollLogic()
             rootPart.CFrame = CFrame.new(targetPos) * CFrame.new(0, 5, 0)
         end
 
-        -- Step B: Wait for valid target
+        -- Step B: Wait for valid target and correct player distance
         if SelectedTarget ~= "Random" then
-            Stewfield:Notify({Title = "Targeting", Content = "Waiting for " .. SelectedTarget .. " (No Rocks allowed)", Duration = 999, Image = "clock"})
+            Stewfield:Notify({Title = "Targeting", Content = "Waiting for " .. SelectedTarget .. " (Avoiding Rocks)", Duration = 999, Image = "clock"})
+            
             repeat
                 task.wait(0.1)
-                if not Players:FindFirstChild(SelectedTarget) or not TrollingActive then break end
+                if not TrollingActive or not Players:FindFirstChild(SelectedTarget) then break end
+                
+                -- Check if the target is currently a rock or invalid
+                local targetP = Players:FindFirstChild(SelectedTarget)
+                if targetP and not IsValidTarget(targetP) then
+                    -- If the target is a rock, wait or loop plates if in void mode
+                    task.wait(0.5)
+                end
+                
             until getClosestPlayerName() == SelectedTarget
+        else
+            -- If Random, check if closest is a rock. If so, cycle baseplates.
+            local currentClosest = getClosestPlayerName()
+            local voidIdx = 1
+            while not currentClosest and TrollingActive do
+                if SelectedTroll == "void" then
+                    voidIdx = (voidIdx % #VoidPositions) + 1
+                    rootPart.CFrame = CFrame.new(VoidPositions[voidIdx]) * CFrame.new(0, 5, 0)
+                end
+                task.wait(0.5)
+                currentClosest = getClosestPlayerName()
+            end
         end
 
         -- Step C: Trigger Swap
