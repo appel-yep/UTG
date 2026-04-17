@@ -55,15 +55,18 @@ local BadgeTab
 local MiscTab
 
 -- Load Info first
-if isLobby3 or isLobby2 then
+if isLobby3 then
     loadTab("https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Info")
 end
 
-BadgeTab = Window:CreateTab("Badges", "medal")
-BadgeTab:CreateLabel("Select a badge glove to load its tab")
+-- Badge Tab
+if isLobby3 then
+    BadgeTab = Window:CreateTab("Badges", "medal")
+    BadgeTab:CreateLabel("Select a badge glove to load its tab")
+end
 
--- Misc Tab for Lobby 2 or 3
-if isLobby3 or isLobby2 then
+-- Misc Tab
+if isLobby3 then
     MiscTab = Window:CreateTab("Misc", "copy-plus")
     MiscTab:CreateLabel("Misc Features")
     MiscTab:CreateParagraph({
@@ -72,21 +75,19 @@ if isLobby3 or isLobby2 then
     })
 end
 
--- Unified Handle Function (Optimized for instant destruction)
-local function handleTab(parentTab, name, locations, url, destroyOnClick)
-    if shouldLoad(locations) then
+-- Unified Handle Function
+local function handleTab(parentTab, name, locations, url)
+    if parentTab and shouldLoad(locations) then
         getgenv().sbstew_LoadedAnyTab = true 
 
         local NewButton
         NewButton = parentTab:CreateButton({
             Name = name,
             Callback = function()
-                -- 1. Handle UI destruction instantly
-                if destroyOnClick and NewButton then
+                if NewButton then
                     NewButton:Destroy()
                 end
 
-                -- 2. Load heavy content in background to prevent UI freezing
                 task.spawn(function()
                     if not createdTabs[name] then
                         local newTab = loadTab(url, name)
@@ -103,20 +104,22 @@ end
 getgenv().sbstew_LoadedAnyTab = false
 
 -- 6. Misc Buttons
-handleTab(MiscTab, "Farming", {"Lobby2"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Farming", true)
-handleTab(MiscTab, "Trolling", {"Lobby2"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Trolling", true)
+handleTab(MiscTab, "Farming", {"Lobby2"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Farming")
+handleTab(MiscTab, "Trolling", {"Lobby2"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Trolling")
 
 -- 7. Badge Glove Buttons
-handleTab(BadgeTab, "Admin", {"Lobby3", "Application"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Admin", false)
-handleTab(BadgeTab, "Bomb", {"Lobby2"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Bomb", false)
-handleTab(BadgeTab, "Boxer", {"Lobby3", "Barzil"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Boxer", false)
-handleTab(BadgeTab, "Plate", {"Lobby3", "Plate"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Plate", false)
-handleTab(BadgeTab, "UTG", {"Lobby3", "Barzil", "UTG_Obby"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/UTG", false)
-handleTab(BadgeTab, "Voodoo", {"Lobby2"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Voodoo", false)
-handleTab(BadgeTab, "Warp", {"Lobby2"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Warp", false)
+if isLobby3 then
+    handleTab(BadgeTab, "Admin", {"Lobby3", "Application"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Admin")
+    handleTab(BadgeTab, "Bomb", {"Lobby2"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Bomb")
+    handleTab(BadgeTab, "Boxer", {"Lobby3", "Barzil"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Boxer")
+    handleTab(BadgeTab, "Plate", {"Lobby3", "Plate"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Plate")
+    handleTab(BadgeTab, "UTG", {"Lobby3", "Barzil", "UTG_Obby"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/UTG")
+    handleTab(BadgeTab, "Voodoo", {"Lobby2"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Voodoo")
+    handleTab(BadgeTab, "Warp", {"Lobby2"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Warp")
+end
 
 -- Check if anything loaded
-if not getgenv().sbstew_LoadedAnyTab and not isLobby2 and not isLobby3 then
+if not getgenv().sbstew_LoadedAnyTab and not isLobby3 then
     local ErrorTab = Window:CreateTab("Unsupported", "circle-alert")
     ErrorTab:CreateParagraph({
         Title = "Unsupported Experience",
