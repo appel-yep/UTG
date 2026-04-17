@@ -9,6 +9,7 @@ getgenv().sbstew_Places = {
     ["UTG_Obby"]    = (currentPlaceId == 115782629143468),
     ["Application"] = (currentPlaceId == 16034567693),
     ["Plate"] = (currentPlaceId == 106620300132058),
+    ["Maze"] = (currentPlaceId == 11828384869),
 }
 
 getgenv().sbstew_LoadedAnyTab = false 
