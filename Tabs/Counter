@@ -78,17 +78,17 @@ CounterTab:CreateButton({
                     -- Reset Keypad first
                     if keypad.Buttons:FindFirstChild("Reset") then
                         fireclickdetector(keypad.Buttons.Reset.ClickDetector)
-                        task.wait(0.2)
+                        task.wait(0.3)
                     end
                     
-                    -- Logic to enter code
+                    -- Logic to enter code (Fixed delay to prevent skipping numbers)
                     local codeToEnter = currentCode
                     for i = 1, #codeToEnter do
                         local digit = string.sub(codeToEnter, i, i)
                         local button = keypad.Buttons:FindFirstChild(digit)
                         if button and button:FindFirstChild("ClickDetector") then
                             fireclickdetector(button.ClickDetector)
-                            task.wait(0.1)
+                            task.wait(0.35) -- Increased delay for reliability
                         end
                     end
                     fireclickdetector(keypad.Buttons.Enter.ClickDetector)
@@ -123,7 +123,7 @@ CounterTab:CreateButton({
                 leverStartTime = tick()
                 Stewfield:Notify({
                     Title = "Lever Flipped",
-                    Content = "Timer started! Wait 2 minutes (121s).",
+                    Content = "Pim has spawned! Timer started. Wait 121 seconds for the glove to spawn.",
                     Duration = 5,
                     Image = "check-circle",
                 })
@@ -151,22 +151,25 @@ CounterTab:CreateButton({
     Name = "Destroy Pim",
     Callback = function()
         if Places["Maze"] then
-            local npc = Workspace:FindFirstChild("Pim")
-            if npc and npc:FindFirstChild("HumanoidRootPart") then
-                local position = Vector3.new(-516.951111, 8.21111965, -141.350296)
-                local orientation = Vector3.new(1.00135803e-05, 7.00354576e-06, 1)
-                npc.HumanoidRootPart.CFrame = CFrame.new(position, position + orientation)
-                
-                Stewfield:Notify({
-                    Title = "Pim Relocated",
-                    Content = "Pim has been sent to the void/wall.",
-                    Duration = 3,
-                    Image = "trash-2",
-                })
+            local npc = Workspace:FindFirstChild("Pim") 
+            if npc then
+                local hrp = npc:FindFirstChild("HumanoidRootPart") or npc:FindFirstChild("Torso")
+                if hrp then
+                    local position = Vector3.new(-516.951111, 8.21111965, -141.350296)
+                    local orientation = Vector3.new(1.00135803e-05, 7.00354576e-06, 1)
+                    hrp.CFrame = CFrame.new(position, position + orientation)
+                    
+                    Stewfield:Notify({
+                        Title = "Pim Destroyed",
+                        Content = "Pim has been sent away. Now wait for the timer to finish.",
+                        Duration = 3,
+                        Image = "trash-2",
+                    })
+                end
             else
                 Stewfield:Notify({
                     Title = "Error",
-                    Content = "Pim is not currently spawned.",
+                    Content = "Pim is not currently spawned. Flip the lever first!",
                     Duration = 4,
                     Image = "circle-alert",
                 })
@@ -201,7 +204,7 @@ CounterTab:CreateButton({
                 if timeLeft <= 0 then
                     Stewfield:Notify({
                         Title = "Time Up!",
-                        Content = "Counter glove should have spawned!",
+                        Content = "Counter glove has spawned! You can now collect it.",
                         Duration = 3,
                         Image = "hourglass"
                     })
@@ -210,7 +213,7 @@ CounterTab:CreateButton({
                     local seconds = math.floor(timeLeft % 60)
                     Stewfield:Notify({
                         Title = "Time Remaining",
-                        Content = string.format("Pim spawns in: %d minutes and %d seconds", minutes, seconds),
+                        Content = string.format("Glove spawns in: %d minutes and %d seconds", minutes, seconds),
                         Duration = 5,
                         Image = "hourglass"
                     })
@@ -227,15 +230,27 @@ CounterTab:CreateButton({
     end,
 })
 
--- 5. Tp to Counter Glove
+-- 5. Tp to Counter Glove (Added Timer Check)
 CounterTab:CreateButton({
     Name = "Tp to counter glove",
     Callback = function()
         if Places["Maze"] then
+            -- Check if timer is finished
+            local timeElapsed = leverStartTime and (tick() - leverStartTime) or 0
+            if leverStartTime == nil or timeElapsed < 121 then
+                Stewfield:Notify({
+                    Title = "Wait!",
+                    Content = "The timer hasn't finished yet! Stay safe until Pim is gone.",
+                    Duration = 4,
+                    Image = "clock"
+                })
+                return
+            end
+
             local maze = Workspace:FindFirstChild("Maze")
             if maze then
                 local parts = maze:GetChildren()
-                local part = parts[673] -- Using index 673 per logic provided
+                local part = parts[673]
                 if part and LocalPlayer.Character then
                     local hrp = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
                     if hrp then
@@ -251,7 +266,7 @@ CounterTab:CreateButton({
             else
                 Stewfield:Notify({
                     Title = "Error",
-                    Content = "Maze map not found. Are you in the right place?",
+                    Content = "Maze map not found.",
                     Duration = 4,
                     Image = "circle-alert"
                 })
@@ -269,7 +284,7 @@ CounterTab:CreateButton({
 
 CounterTab:CreateParagraph({
     Title = "Instructions",
-    Content = "1. Check the Keypad Status. If it says 'Yes', press 'Go to maze'.\n2. Once inside, find and press 'Flip the lever'.\n3. Wait 2 minutes. Use 'Check time remaining' to track Pim's arrival.\n4. When Pim spawns, press 'Destroy Pim' to stay safe.\n5. Press 'Tp to counter glove' to collect the badge."
+    Content = "1. Check the Keypad Status. If it says 'Yes', press 'Go to maze'.\n2. Once inside, press 'Flip the lever' to spawn Pim and start the timer.\n3. Immediately press 'Destroy Pim' to remove the threat.\n4. Wait 2 minutes. Use 'Check time remaining' to see when the glove spawns.\n5. Once the timer is up, press 'Tp to counter glove' to collect your reward."
 })
 
 return CounterTab
