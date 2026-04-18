@@ -1,5 +1,12 @@
+if not getgenv().sbstew_Utils then
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Stuff"))()
+end
+
 local Stewfield = getgenv().sbstew_Stewfield
 local Window = getgenv().sbstew_Window
+local Places = getgenv().sbstew_Places
+local Utils = getgenv().sbstew_Utils
+local Remotes = getgenv().sbstew_Remotes
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -7,23 +14,20 @@ local Workspace = game:GetService("Workspace")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local MarketPlaceService = game:GetService("MarketplaceService")
 
--- Configuration & State
 local TrollCount = 1
 local TrollingActive = false
 local SelectedTroll = "void"
 local SelectedTarget = "Random"
-local ResetRemote = ReplicatedStorage:WaitForChild("SelfDestruct", 5) or ReplicatedStorage:WaitForChild("Reset", 5)
-local SLOC_Remote = ReplicatedStorage:WaitForChild("SLOC", 5)
+local ResetRemote = Remotes.Misc.Reset
+local SLOC_Remote = Remotes.Ability.Swapper
 
--- Void Coordinates
 local VoidPositions = {
-    Vector3.new(101, -107, 24),    -- Original
-    Vector3.new(-3.6, -107, 115.4), -- Pos 1
-    Vector3.new(-116.3, -107, 0.5), -- Pos 2
-    Vector3.new(-4.7, -107, -111.1) -- Pos 3
+    Vector3.new(101, -107, 24),
+    Vector3.new(-3.6, -107, 115.4),
+    Vector3.new(-116.3, -107, 0.5),
+    Vector3.new(-4.7, -107, -111.1)
 }
 
--- Remote Protection Hook
 local oldNamecall
 oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
     local method = getnamecallmethod()
@@ -35,15 +39,6 @@ oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
     return oldNamecall(self, ...)
 end)
 
--- Helper logic for Stats
-local function getStats()
-    local stats = LocalPlayer:FindFirstChild("leaderstats")
-    local slaps = (stats and stats:FindFirstChild("Slaps")) and stats.Slaps.Value or 0
-    local currentGlove = (stats and stats:FindFirstChild("Glove")) and stats.Glove.Value or "None"
-    return slaps, currentGlove
-end
-
--- Full Rock Sensing
 local function IsValidTarget(p)
     local Character = p.Character
     if not Character then return false end
@@ -52,15 +47,13 @@ local function IsValidTarget(p)
     local Root = Character:FindFirstChild("HumanoidRootPart")
     if not Humanoid or not Root or Humanoid.Health <= 0 then return false end
 
-    -- Rock Logic
-    local InLobby = Character:FindFirstChild("InLobby")
+    local InLobby = Utils.IsInLobby(Character)
     local Rock = Character:FindFirstChild("rock") or Character:FindFirstChild("megarock")
     local Steve = Character:FindFirstChild("stevebody")
 
     return (not Rock and not Steve and not InLobby)
 end
 
--- Helper logic to find the closest valid player name
 local function getClosestPlayerName()
     local closestName = nil
     local shortestDist = math.huge
@@ -80,13 +73,11 @@ local function getClosestPlayerName()
     return closestName
 end
 
--- Tab Creation
 local TrollingTab = Window:CreateTab("Trolling", "laugh")
 
 local TrollingToggle
 local TargetDropdown
 
--- Dropdown Refresh Logic
 local function RefreshPlayerList()
     local playerNames = {"Random"}
     for _, p in pairs(Players:GetPlayers()) do
@@ -102,12 +93,10 @@ end
 Players.PlayerAdded:Connect(RefreshPlayerList)
 Players.PlayerRemoving:Connect(RefreshPlayerList)
 
--- Lobby Check Logic
 task.spawn(function()
     while task.wait(0.5) do
         if TrollingActive then
-            local LobbyPath = Workspace:FindFirstChild(LocalPlayer.Name) and Workspace[LocalPlayer.Name]:FindFirstChild("InLobby")
-            if LobbyPath then
+            if Utils.IsInLobby() then
                 TrollingActive = false
                 if TrollingToggle then TrollingToggle:Set(false) end
                  Stewfield:Notify({
@@ -121,16 +110,14 @@ task.spawn(function()
     end
 end)
 
--- Main Logic Function
 local function RunTrollLogic()
     local char = LocalPlayer.Character
     local rootPart = char and char:FindFirstChild("HumanoidRootPart")
     if not char or not rootPart then return end
     
-    local _, glove = getStats()
-    local LobbyPath = Workspace:FindFirstChild(LocalPlayer.Name) and Workspace[LocalPlayer.Name]:FindFirstChild("InLobby")
+    local _, glove = Utils.GetStats()
 
-    if LobbyPath then
+    if Utils.IsInLobby() then
         TrollingActive = false
         if TrollingToggle then TrollingToggle:Set(false) end
         Stewfield:Notify({Title = "Arena Required", Content = "Please enter the arena!", Duration = 5, Image = "circle-alert"})
@@ -144,10 +131,8 @@ local function RunTrollLogic()
         return
     end
 
-    -- Initial Delay
     task.wait(2.5)
 
-    -- Creation of Void Parts
     local voidParts = {}
     if SelectedTroll == "void" then
         for i, pos in ipairs(VoidPositions) do
@@ -166,7 +151,6 @@ local function RunTrollLogic()
     for i = 1, TrollCount do
         if not TrollingActive then break end
 
-        -- Step A: Position User (Teleport)
         if SelectedTroll == "cube of death" then
             local cubePath = Workspace.Arena.CubeOfDeathArea:FindFirstChild("the cube of death(i heard it kills)")
             if cubePath then
@@ -197,7 +181,6 @@ local function RunTrollLogic()
             rootPart.CFrame = CFrame.new(targetPos) * CFrame.new(0, 5, 0)
         end
 
-        -- Step B: Wait for valid target and correct player distance
         if SelectedTarget ~= "Random" then
             Stewfield:Notify({Title = "Targeting", Content = "Waiting for " .. SelectedTarget .. "", Duration = 5, Image = "clock"})
             
@@ -206,7 +189,6 @@ local function RunTrollLogic()
                 task.wait(0.1)
                 if not TrollingActive or not Players:FindFirstChild(SelectedTarget) then break end
                 
-                -- 5 Second Plate Recalculation
                 if SelectedTroll == "void" and tick() - lastPlateCheck >= 5 then
                     lastPlateCheck = tick()
                     local tPlayer = Players:FindFirstChild(SelectedTarget)
@@ -232,7 +214,6 @@ local function RunTrollLogic()
                 
             until getClosestPlayerName() == SelectedTarget
         else
-            -- If Random, cycle plates until someone valid is nearby
             local currentClosest = getClosestPlayerName()
             local voidIdx = 1
             local lastPlateCheck = tick()
@@ -247,18 +228,14 @@ local function RunTrollLogic()
             end
         end
 
-
-        -- Step C: Trigger Swap
         task.wait(0.3)
         if SLOC_Remote and TrollingActive then
             SLOC_Remote:FireServer()
         end
 
-        -- Step D: Post-Swap Sequence (Wait 0.5 -> Teleport -> Wait 5.5)
         if i < TrollCount then 
             task.wait(0.5)
             
-            -- Teleport again immediately after 0.5s wait
             if SelectedTroll == "cube of death" then
                 local cubePath = Workspace.Arena.CubeOfDeathArea:FindFirstChild("the cube of death(i heard it kills)")
                 if cubePath then rootPart.CFrame = cubePath.CFrame * CFrame.new(0, 5, 0) end
@@ -267,7 +244,7 @@ local function RunTrollLogic()
                 rootPart.CFrame = CFrame.new(targetPos) * CFrame.new(0, 5, 0)
             end
 
-            task.wait(5.5) -- Wait the remainder of the 6 seconds
+            task.wait(5.5)
         end
     end
 
