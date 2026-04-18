@@ -71,6 +71,7 @@ local function GetTarget()
                     local InMap = (Root.Position - ZeroPosition).Magnitude < RoamRange
                     local InLobby = Character:FindFirstChild("InLobby")
                     local Rock = Character:FindFirstChild("rock")
+                    local Rob = Workspace:FindFirstChild(v.Name) and Workspace[v.Name]:FindFirstChild("RobTransformed")
                     local Reverse = Character:FindFirstChild("Reversed")
                     local Skull = Character:FindFirstChild("Skull")
                     local Counter = Character:FindFirstChild("Counterd")
@@ -78,6 +79,10 @@ local function GetTarget()
                     local Visible = Character:FindFirstChild("CarKeysCar") or (Character:FindFirstChild("Head") or Character:FindFirstChildWhichIsA("BasePart")).Transparency == 0
                     local BuddyBox = Character.Head:FindFirstChild("BuddyBox")
                     local Ragdolled = Character:FindFirstChild("FakePart Right Arm")
+
+
+local Approved = (InMap and Distance < ShortestDistance and not Rock and not Rob and not Reverse and not Steve and not Skull and Visible and not BuddyBox and not Ragdolled and not InLobby and not Counter)
+
 
                     local Approved = (InMap and Distance < ShortestDistance and not Rock and not Reverse and not Steve and not Skull and Visible and not BuddyBox and not Ragdolled and not InLobby and not Counter)
 
