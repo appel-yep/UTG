@@ -134,7 +134,7 @@ CounterTab:CreateButton({
         else
             Stewfield:Notify({
                 Title = "Wrong Place",
-                Content = "You must be in the ? Maze to use this.",
+                Content = "You must be in the Maze to use this.",
                 Duration = 4,
                 Image = "circle-alert",
             })
@@ -148,26 +148,45 @@ CounterTab:CreateButton({
     Callback = function()
         if Places["Maze"] then
             local npc = Workspace:FindFirstChild("Pim") 
+            -- Logic to attempt Pim relocation
             if npc then
-                local hrp = npc:FindFirstChild("HumanoidRootPart") or npc:FindFirstChild("Torso")
-                if hrp then
+                local p_hrp = npc:FindFirstChild("HumanoidRootPart") or npc:FindFirstChild("Torso")
+                if p_hrp then
                     local position = Vector3.new(-516.951111, 8.21111965, -141.350296)
                     local orientation = Vector3.new(1.00135803e-05, 7.00354576e-06, 1)
-                    hrp.CFrame = CFrame.new(position, position + orientation)
+                    p_hrp.CFrame = CFrame.new(position, position + orientation)
                     
                     Stewfield:Notify({
                         Title = "Pim Destroyed",
-                        Content = "Pim has been sent away. Now wait for the timer to finish.",
+                        Content = "Pim has been sent away. Teleporting to safety...",
                         Duration = 3,
                         Image = "trash-2",
                     })
                 end
             else
                 Stewfield:Notify({
-                    Title = "Error",
-                    Content = "Pim is not currently spawned. Flip the lever first!",
-                    Duration = 4,
+                    Title = "Pim Not Found",
+                    Content = "Pim isn't here, but teleporting to safety regardless.",
+                    Duration = 3,
                     Image = "circle-alert",
+                })
+            end
+            
+            -- Jump and Teleport player to safe coordinates
+            local char = LocalPlayer.Character
+            local hrp = char and char:FindFirstChild("HumanoidRootPart")
+            local hum = char and char:FindFirstChild("Humanoid")
+            
+            if hrp and hum then
+                hum:ChangeState(Enum.HumanoidStateType.Jumping)
+                task.wait(0.1)
+                hrp.CFrame = CFrame.new(-7, 34, -37)
+                
+                Stewfield:Notify({
+                    Title = "Safe Spot",
+                    Content = "Teleported to safety. Wait for the timer to end.",
+                    Duration = 3,
+                    Image = "shield-check"
                 })
             end
         else
@@ -279,7 +298,7 @@ CounterTab:CreateButton({
 
 CounterTab:CreateParagraph({
     Title = "Instructions",
-    Content = "1. Check the Keypad Status. If it says 'Yes', press 'Go to maze'.\n2. Once inside, press 'Flip the lever' to spawn Pim and start the timer.\n3. Press 'Destroy Pim' to remove the threat.\n4. Wait 2 minutes. Use 'Check time remaining' to see when the glove spawns.\n5. Once the timer is up, press 'Tp to counter glove' then click on it to receive the badge."
+    Content = "1. Check the Keypad Status. If it says 'Yes', press 'Go to maze'.\n2. Once inside, press 'Flip the lever' to spawn Pim and start the timer.\n3. Press 'Destroy Pim' to remove the threat and teleport to safety.\n4. Wait 2 minutes. Use 'Check time remaining' to see when the glove spawns.\n5. Once the timer is up, press 'Tp to counter glove' then click on it to receive the badge."
 })
 
 return CounterTab
