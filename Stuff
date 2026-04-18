@@ -11,7 +11,7 @@ end
 
 -- Define Places Globally
 getgenv().sbstew_Places = {
-    ["Lobby"]       = (currentPlaceId == 6403373529),
+    ["Lobby1"]       = (currentPlaceId == 6403373529),
     ["Lobby2"]      = (currentPlaceId == 6403373529 or currentPlaceId == 9015014224),
     ["Lobby3"]      = (currentPlaceId == 6403373529 or currentPlaceId == 9015014224 or currentPlaceId == 11520107397),
     ["Barzil"]      = (currentPlaceId == 7234087065),
