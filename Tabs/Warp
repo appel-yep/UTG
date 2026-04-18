@@ -3,7 +3,7 @@ local Stewfield = getgenv().sbstew_Stewfield
 local Window = getgenv().sbstew_Window
 local Places = getgenv().sbstew_Places
 
--- Load Engine if not already present
+-- Load Engine from the provided link
 if not getgenv().BotEngine then
     loadstring(game:HttpGet("https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Engine"))()
 end
@@ -11,79 +11,20 @@ local Engine = getgenv().BotEngine
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
 local TargetGlove = "Swapper"
-local LockedTarget = nil
-local SlapCooldown = false
 local InfiniteMode = false
-
--- Remote/Animation references from Engine
-local SlapRemote = ReplicatedStorage.HitSwapper
-local AbilityRemote = ReplicatedStorage:WaitForChild("SLOC")
-local SlapAnimation = ReplicatedStorage.Slap
 
 local WarpTab = Window:CreateTab("Warp Glove", "rss")
 WarpTab:CreateLabel("Warp Glove Obtainment")
 
-local function PerformWarpLogic()
-    local Character = LocalPlayer.Character
-    local Humanoid = Character and Character:FindFirstChild("Humanoid")
-    if not Character or not Humanoid then return end
-
-    getgenv().BSF = true
-    
-    task.spawn(function()
-        while getgenv().BSF do
-            if Engine.IsInLobby(Character) then
-                -- Engine Lobby Logic
-                local _, currentGlove = Engine.GetStats()
-                if currentGlove ~= TargetGlove then
-                    Engine.EquipGlove(TargetGlove)
-                else
-                    Engine.WalkToPortal()
-                end
-            else
-                local TargetPlayer, Distance = Engine.GetValidTarget(Humanoid, 80)
-
-                if TargetPlayer and TargetPlayer.Character then
-                    local TargetRoot = TargetPlayer.Character:FindFirstChildWhichIsA("Humanoid").RootPart
-                    if Humanoid.Health > 0 and TargetRoot then
-                        Humanoid:MoveTo(TargetRoot.Position)
-
-                        -- Slap Logic
-                        if Distance < 15 and not SlapCooldown then
-                            SlapCooldown = true
-                            local AnimTrack = Humanoid:FindFirstChild("Animator"):LoadAnimation(SlapAnimation)
-                            if AnimTrack then AnimTrack:Play() end
-                            SlapRemote:FireServer(TargetRoot)
-                            task.delay(0.6, function() SlapCooldown = false end)
-                        end
-                    end
-                else
-                    getgenv().BSF = false
-                    task.spawn(function()
-                        task.wait(0.35)
-                        AbilityRemote:FireServer()
-                        task.wait(1)
-                        if ReplicatedStorage:FindFirstChild("SelfDestruct") then
-                            ReplicatedStorage.SelfDestruct:FireServer()
-                        end
-                    end)
-                end
-            end
-            RunService.RenderStepped:Wait()
-        end
-    end)
-end
-
 -- Character Connection for Infinite Mode
 LocalPlayer.CharacterAdded:Connect(function(char)
+    task.wait(0.5)
     if InfiniteMode then
-        task.wait(1)
-        PerformWarpLogic()
+        Engine.SetupCharacter(char)
+        Engine.ToggleWarpObtainment(true)
     end
 end)
 
@@ -91,7 +32,7 @@ WarpTab:CreateButton({
     Name = "Equip Swapper glove",
     Callback = function()
         if Engine.IsInLobby() then
-            local slaps = Engine.GetStats()
+            local slaps, _ = Engine.GetStats()
             if slaps >= 350 then
                 Engine.EquipGlove("Swapper")
             else
@@ -117,8 +58,12 @@ WarpTab:CreateButton({
     Name = "Get Warp",
     Callback = function()
         local _, currentGlove = Engine.GetStats()
+
         if currentGlove == "Swapper" then
-            PerformWarpLogic()
+            if LocalPlayer.Character then
+                Engine.SetupCharacter(LocalPlayer.Character)
+                Engine.ToggleWarpObtainment(true)
+            end
         else
             Stewfield:Notify({
                 Title = "Glove Required",
