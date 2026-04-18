@@ -135,6 +135,7 @@ manageTab("Admin", {"Lobby3", "Application"}, "https://raw.githubusercontent.com
 manageTab("Bomb", {"Lobby2"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Bomb", BadgeTab)
 manageTab("Boxer", {"Lobby3", "Barzil"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Boxer", BadgeTab)
 manageTab("Counter", {"Lobby3", "Maze"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Counter", BadgeTab)
+manageTab("Elude", {"Lobby3", "Maze"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Elude", BadgeTab)
 manageTab("Plate", {"Lobby3", "Plate"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Plate", BadgeTab)
 manageTab("RNG", {"Lobby2"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/RNG", BadgeTab)
 manageTab("UTG", {"Lobby3", "Barzil", "UTG_Obby"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/UTG", BadgeTab)
