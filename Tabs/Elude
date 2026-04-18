@@ -1,0 +1,204 @@
+-- ELUDE GLOVE TAB SCRIPT
+local Stewfield = getgenv().sbstew_Stewfield
+local Window = getgenv().sbstew_Window
+local Places = getgenv().sbstew_Places
+
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local LocalPlayer = Players.LocalPlayer
+
+-- Logic for Keypad Status and Code
+local function getKeypadInfo()
+    local keypad = Workspace:FindFirstChild("Keypad")
+    local status = "No"
+    local code = (#Players:GetPlayers() * 25) + 1100 - 7
+    
+    if keypad then
+        local pivot = keypad:GetPivot()
+        -- Elude keypad shares similar logic to Counter keypad
+        if math.abs(pivot.X - (-427.55)) < 5 then
+            status = "Yes (Slapple Island)"
+        else
+            status = "Yes (Moai Island)"
+        end
+    end
+    return status, tostring(code)
+end
+
+local keypadStatus, currentCode = getKeypadInfo()
+
+-- Create Tab
+local EludeTab = Window:CreateTab("Elude Glove", "hat-glasses")
+EludeTab:CreateLabel("Elude Glove Obtainment")
+
+-- Keypad Status Paragraph
+local StatusPara = EludeTab:CreateParagraph({
+    Title = "Keypad Status",
+    Content = string.format("Spawned: %s\nCode: %s", keypadStatus, currentCode)
+})
+
+-- Dynamic Update Loop for Paragraph
+task.spawn(function()
+    while task.wait(1) do
+        local status, code = getKeypadInfo()
+        StatusPara:Set({
+            Title = "Keypad Status",
+            Content = string.format("Spawned: %s\nCode: %s", status, code)
+        })
+        keypadStatus = status
+        currentCode = code
+    end
+end)
+
+-- 1. Go to Maze (Keypad Logic)
+EludeTab:CreateButton({
+    Name = "Go to maze",
+    Callback = function()
+        if Places["Lobby3"] then
+            local keypad = Workspace:FindFirstChild("Keypad")
+            if keypad then
+                local character = LocalPlayer.Character
+                local humanoid = character and character:FindFirstChild("Humanoid")
+                local hrp = character and character:FindFirstChild("HumanoidRootPart")
+                
+                if hrp and humanoid then
+                    if character:FindFirstChild("InLobby") then
+                        humanoid:MoveTo(Workspace.Lobby.Teleport1.Position)
+                        humanoid.MoveToFinished:Wait()
+                        task.wait(0.9)
+                    end
+                    
+                    hrp.CFrame = keypad:GetPivot() * CFrame.new(0, 0, -3)
+                    task.wait(0.5)
+                    
+                    if keypad.Buttons:FindFirstChild("Reset") then
+                        fireclickdetector(keypad.Buttons.Reset.ClickDetector)
+                        task.wait(0.3)
+                    end
+                    
+                    local codeToEnter = currentCode
+                    for i = 1, #codeToEnter do
+                        local digit = string.sub(codeToEnter, i, i)
+                        local button = keypad.Buttons:FindFirstChild(digit)
+                        if button and button:FindFirstChild("ClickDetector") then
+                            fireclickdetector(button.ClickDetector)
+                            task.wait(0.35)
+                        end
+                    end
+                    fireclickdetector(keypad.Buttons.Enter.ClickDetector)
+                end
+            else
+                Stewfield:Notify({
+                    Title = "Not Found",
+                    Content = "Keypad is not currently spawned.",
+                    Duration = 4,
+                    Image = "circle-alert",
+                })
+            end
+        else
+            Stewfield:Notify({
+                Title = "Wrong Game",
+                Content = "You must be in the Lobby to use this.",
+                Duration = 4,
+                Image = "circle-alert",
+            })
+        end
+    end,
+})
+
+-- 2. Collect each item
+EludeTab:CreateButton({
+    Name = "Collect each item",
+    Callback = function()
+        if Places["Maze"] then
+            local items = {
+                Workspace.Collectable:FindFirstChild("Meshes/gluea_model"),
+                Workspace.Collectable:FindFirstChild("Minecraft Error Block"),
+                Workspace.Collectable:FindFirstChild("Part"),
+                Workspace.Collectable:GetChildren()[3]
+            }
+            
+            local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid")
+            
+            if hrp and humanoid then
+                for i, item in ipairs(items) do
+                    if item then
+                        humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                        task.wait(0.1)
+                        hrp.CFrame = item:GetPivot()
+                        
+                        Stewfield:Notify({
+                            Title = "Collecting",
+                            Content = "Teleported to item " .. i .. "/4",
+                            Duration = 1.5,
+                            Image = "package"
+                        })
+                        task.wait(2)
+                    end
+                end
+                
+                Stewfield:Notify({
+                    Title = "Finished",
+                    Content = "All items collected! You can now teleport to the glove.",
+                    Duration = 4,
+                    Image = "check-circle"
+                })
+            end
+        else
+            Stewfield:Notify({
+                Title = "Wrong Place",
+                Content = "You must be in the Maze to use this.",
+                Duration = 4,
+                Image = "circle-alert",
+            })
+        end
+    end,
+})
+
+-- 3. Tp to elude glove
+EludeTab:CreateButton({
+    Name = "Tp to elude glove",
+    Callback = function()
+        if Places["Maze"] then
+            local eludeGlove = Workspace.Ruins:FindFirstChild("Elude")
+            local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid")
+            
+            if eludeGlove and hrp and humanoid then
+                humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                task.wait(0.1)
+                hrp.CFrame = eludeGlove:GetPivot()
+                
+                Stewfield:Notify({
+                    Title = "Success",
+                    Content = "Teleported to the Elude Glove!",
+                    Duration = 4,
+                    Image = "map-pin"
+                })
+            else
+                Stewfield:Notify({
+                    Title = "Error",
+                    Content = "Elude glove not found in Ruins.",
+                    Duration = 4,
+                    Image = "circle-alert"
+                })
+            end
+        else
+            Stewfield:Notify({
+                Title = "Wrong Place",
+                Content = "You must be in the Maze to use this.",
+                Duration = 4,
+                Image = "circle-alert",
+            })
+        end
+    end,
+})
+
+-- Instructions
+EludeTab:CreateParagraph({
+    Title = "Instructions",
+    Content = "1. Check Keypad Status in Lobby. If spawned, press 'Go to maze'.\n2. Once in the Maze place, press 'Collect each item' and wait for the sequence to finish.\n3. Finally, press 'Tp to elude glove' to claim your badge."
+})
+
+return EludeTab
