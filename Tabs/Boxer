@@ -1,7 +1,13 @@
 -- BOXER GLOVE TAB SCRIPT
+
+if not getgenv().sbstew_Utils then
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Stuff"))()
+end
+
 local Stewfield = getgenv().sbstew_Stewfield
 local Window = getgenv().sbstew_Window
 local Places = getgenv().sbstew_Places
+local Utils = getgenv().sbstew_Utils
 
 -- Create Tab
 local BoxerTab = Window:CreateTab("Boxer Glove", "box")
@@ -11,12 +17,13 @@ BoxerTab:CreateLabel("Boxer Glove Buttons")
 BoxerTab:CreateButton({
     Name = "Tp to Barzil portal",
     Callback = function()
-        if Places["Lobby3"] then    
-            firetouchinterest(game:GetService("Players").LocalPlayer.Character:WaitForChild("Head"), Workspace.Lobby.brazil.portal, 0) 
+        if Places["Lobby3"] then 
+            local char = game.Players.LocalPlayer.Character
+            firetouchinterest(char:WaitForChild("Head"), Workspace.Lobby.brazil.portal, 0) 
             task.wait(0.1) 
-            firetouchinterest(game:GetService("Players").LocalPlayer.Character:WaitForChild("Head"), Workspace.Lobby.brazil.portal, 1)
+            firetouchinterest(char:WaitForChild("Head"), Workspace.Lobby.brazil.portal, 1)
             task.wait(2)
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = workspace.Lobby.brazil.portal.CFrame
+            char.HumanoidRootPart.CFrame = workspace.Lobby.brazil.portal.CFrame
         else
             Stewfield:Notify({
                 Title = "Wrong Game",
