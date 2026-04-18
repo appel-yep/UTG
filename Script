@@ -1,7 +1,7 @@
 -- MAIN LOADER SCRIPT
 local g = getgenv()
 local currentPlaceId = game.PlaceId
-local loaderUrl = "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Script"
+local loaderUrl = "https://raw.githubusercontent.com/stewingit/sbstew/heads/main/Script"
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -49,8 +49,10 @@ local function loadTab(url, name)
 end
 
 --- 5. Tab Loading Section ---
-local isLobby3 = getgenv().sbstew_Places["Lobby3"]
+local isLobby1 = getgenv().sbstew_Places["Lobby1"]
 local isLobby2 = getgenv().sbstew_Places["Lobby2"]
+local isLobby3 = getgenv().sbstew_Places["Lobby3"]
+
 local BadgeTab
 local MiscTab
 
@@ -59,13 +61,12 @@ if isLobby3 then
     loadTab("https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Info")
 end
 
--- Create Lobby Containers
 if isLobby3 then
     BadgeTab = Window:CreateTab("Badges", "medal")
     BadgeTab:CreateLabel("Select a badge glove to load its tab")
 end
 
-if isLobby3 or isLobby2 then
+if isLobby2 then
     MiscTab = Window:CreateTab("Misc", "copy-plus")
     MiscTab:CreateLabel("Misc Features")
     MiscTab:CreateParagraph({
@@ -105,9 +106,9 @@ local function manageTab(name, locations, url, parentTab)
     local places = getgenv().sbstew_Places
     local autoLoad = false
     
-    -- Check if we are in a non-lobby location specified for this tab
     for _, loc in ipairs(locations) do
-        if places[loc] and loc ~= "Lobby3" then
+        -- If current place matches the location AND it's not a Lobby, then Autoload
+        if places[loc] and not (loc == "Lobby1" or loc == "Lobby2" or loc == "Lobby3") then
             autoLoad = true
             break
         end
@@ -142,7 +143,7 @@ manageTab("Warp", {"Lobby2"}, "https://raw.githubusercontent.com/stewingit/sbste
 
 -- Check if anything loaded
 task.wait(0.5)
-if not getgenv().sbstew_LoadedAnyTab and not isLobby3 and not isLobby2 then
+if not getgenv().sbstew_LoadedAnyTab and not isAnyLobby then
     local ErrorTab = Window:CreateTab("Unsupported", "circle-alert")
     ErrorTab:CreateParagraph({
         Title = "Unsupported Experience",
