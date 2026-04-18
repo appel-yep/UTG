@@ -64,24 +64,20 @@ CounterTab:CreateButton({
                 local hrp = character and character:FindFirstChild("HumanoidRootPart")
                 
                 if hrp and humanoid then
-                    -- Lobby Check: If "InLobby" exists, walk to portal first
                     if character:FindFirstChild("InLobby") then
                         humanoid:MoveTo(Workspace.Lobby.Teleport1.Position)
                         humanoid.MoveToFinished:Wait()
                         task.wait(0.9)
                     end
                     
-                    -- Teleport to Keypad
                     hrp.CFrame = keypad:GetPivot() * CFrame.new(0, 0, -3)
                     task.wait(0.5)
                     
-                    -- Reset Keypad first
                     if keypad.Buttons:FindFirstChild("Reset") then
                         fireclickdetector(keypad.Buttons.Reset.ClickDetector)
                         task.wait(0.3)
                     end
                     
-                    -- Logic to enter code (Fixed delay to prevent skipping numbers)
                     local codeToEnter = currentCode
                     for i = 1, #codeToEnter do
                         local digit = string.sub(codeToEnter, i, i)
@@ -104,7 +100,7 @@ CounterTab:CreateButton({
         else
             Stewfield:Notify({
                 Title = "Wrong Game",
-                Content = "You must be in Slap Battles to use this.",
+                Content = "You must be in Slap Battles main game to use this.",
                 Duration = 4,
                 Image = "circle-alert",
             })
@@ -123,7 +119,7 @@ CounterTab:CreateButton({
                 leverStartTime = tick()
                 Stewfield:Notify({
                     Title = "Lever Flipped",
-                    Content = "Pim has spawned! Timer started. Wait 121 seconds for the glove to spawn.",
+                    Content = "Pim has spawned! Timer started. Wait 2 minutes for the glove to spawn.",
                     Duration = 5,
                     Image = "check-circle",
                 })
@@ -138,7 +134,7 @@ CounterTab:CreateButton({
         else
             Stewfield:Notify({
                 Title = "Wrong Place",
-                Content = "You must be in the Maze to use this.",
+                Content = "You must be in the ? Maze to use this.",
                 Duration = 4,
                 Image = "circle-alert",
             })
@@ -235,12 +231,11 @@ CounterTab:CreateButton({
     Name = "Tp to counter glove",
     Callback = function()
         if Places["Maze"] then
-            -- Check if timer is finished
             local timeElapsed = leverStartTime and (tick() - leverStartTime) or 0
             if leverStartTime == nil or timeElapsed < 121 then
                 Stewfield:Notify({
                     Title = "Wait!",
-                    Content = "The timer hasn't finished yet! Stay safe until Pim is gone.",
+                    Content = "The timer hasn't finished yet! Wait a little bit longer.",
                     Duration = 4,
                     Image = "clock"
                 })
@@ -284,7 +279,7 @@ CounterTab:CreateButton({
 
 CounterTab:CreateParagraph({
     Title = "Instructions",
-    Content = "1. Check the Keypad Status. If it says 'Yes', press 'Go to maze'.\n2. Once inside, press 'Flip the lever' to spawn Pim and start the timer.\n3. Immediately press 'Destroy Pim' to remove the threat.\n4. Wait 2 minutes. Use 'Check time remaining' to see when the glove spawns.\n5. Once the timer is up, press 'Tp to counter glove' to collect your reward."
+    Content = "1. Check the Keypad Status. If it says 'Yes', press 'Go to maze'.\n2. Once inside, press 'Flip the lever' to spawn Pim and start the timer.\n3. Press 'Destroy Pim' to remove the threat.\n4. Wait 2 minutes. Use 'Check time remaining' to see when the glove spawns.\n5. Once the timer is up, press 'Tp to counter glove' then click on it to receive the badge."
 })
 
 return CounterTab
