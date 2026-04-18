@@ -1,13 +1,17 @@
 -- ELUDE GLOVE TAB SCRIPT
+if not getgenv().sbstew_Utils then
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Stuff"))()
+end
+
 local Stewfield = getgenv().sbstew_Stewfield
 local Window = getgenv().sbstew_Window
 local Places = getgenv().sbstew_Places
+local Utils = getgenv().sbstew_Utils
 
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
 
--- Logic for Keypad Status and Code
 local function getKeypadInfo()
     local keypad = Workspace:FindFirstChild("Keypad")
     local status = "No"
@@ -15,7 +19,6 @@ local function getKeypadInfo()
     
     if keypad then
         local pivot = keypad:GetPivot()
-        -- Elude keypad shares similar logic to Counter keypad
         if math.abs(pivot.X - (-427.55)) < 5 then
             status = "Yes (Slapple Island)"
         else
@@ -27,17 +30,14 @@ end
 
 local keypadStatus, currentCode = getKeypadInfo()
 
--- Create Tab
 local EludeTab = Window:CreateTab("Elude Glove", "eye-off")
 EludeTab:CreateLabel("Elude Glove Obtainment")
 
--- Keypad Status Paragraph
 local StatusPara = EludeTab:CreateParagraph({
     Title = "Keypad Status",
     Content = string.format("Spawned: %s\nCode: %s", keypadStatus, currentCode)
 })
 
--- Dynamic Update Loop for Paragraph
 task.spawn(function()
     while task.wait(1) do
         local status, code = getKeypadInfo()
@@ -50,7 +50,6 @@ task.spawn(function()
     end
 end)
 
--- 1. Go to Maze (Keypad Logic)
 EludeTab:CreateButton({
     Name = "Go to maze",
     Callback = function()
@@ -62,8 +61,8 @@ EludeTab:CreateButton({
                 local hrp = character and character:FindFirstChild("HumanoidRootPart")
                 
                 if hrp and humanoid then
-                    if character:FindFirstChild("InLobby") then
-                        humanoid:MoveTo(Workspace.Lobby.Teleport1.Position)
+                    if Utils.IsInLobby(character) then
+                        Utils.WalkToPortal()
                         humanoid.MoveToFinished:Wait()
                         task.wait(0.9)
                     end
@@ -106,7 +105,6 @@ EludeTab:CreateButton({
     end,
 })
 
--- 2. Collect each item
 EludeTab:CreateButton({
     Name = "Collect each item",
     Callback = function()
@@ -156,7 +154,6 @@ EludeTab:CreateButton({
     end,
 })
 
--- 3. Tp to elude glove
 EludeTab:CreateButton({
     Name = "Tp to elude glove",
     Callback = function()
@@ -195,7 +192,6 @@ EludeTab:CreateButton({
     end,
 })
 
--- Instructions
 EludeTab:CreateParagraph({
     Title = "Instructions",
     Content = "1. Check Keypad Status in Lobby. If spawned, press 'Go to maze'.\n2. Once in the Maze place, press 'Collect each item' and wait for the sequence to finish.\n3. Finally, press 'Tp to elude glove' to claim your badge."
