@@ -66,7 +66,7 @@ if isLobby3 then
     BadgeTab:CreateLabel("Select a badge glove to load its tab")
 end
 
-if isLobby2 then
+if isLobby3 then
     MiscTab = Window:CreateTab("Misc", "copy-plus")
     MiscTab:CreateLabel("Misc Features")
     MiscTab:CreateParagraph({
