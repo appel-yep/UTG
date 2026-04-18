@@ -1,37 +1,27 @@
 -- VOODOO GLOVE TAB SCRIPT
+if not getgenv().sbstew_Utils then
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Stuff"))()
+end
+
 local Stewfield = getgenv().sbstew_Stewfield
 local Window = getgenv().sbstew_Window
 local Places = getgenv().sbstew_Places
+local Utils = getgenv().sbstew_Utils
 
 local LocalPlayer = game:GetService("Players").LocalPlayer
+local Workspace = game:GetService("Workspace")
 
--- Create Tab
 local VoodooTab = Window:CreateTab("Voodoo Glove", "skull")
 VoodooTab:CreateLabel("Voodoo Glove Buttons")
 
--- Helper: Get Slaps and Glove
-local function getStats()
-    local stats = LocalPlayer:FindFirstChild("leaderstats")
-    local slaps = (stats and stats:FindFirstChild("Slaps")) and stats.Slaps.Value or 0
-    local currentGlove = (stats and stats:FindFirstChild("Glove")) and stats.Glove.Value or "None"
-    return slaps, currentGlove
-end
-
--- 1. Equip Ghost Glove
 VoodooTab:CreateButton({
     Name = "Equip Ghost",
     Callback = function()
-        local LobbyPath = Workspace:FindFirstChild(LocalPlayer.Name) 
-            and Workspace[LocalPlayer.Name]:FindFirstChild("InLobby")
+        local slaps, _ = Utils.GetStats()
 
-        local slaps, _ = getStats()
-
-        if LobbyPath then
+        if Utils.IsInLobby() then
             if slaps >= 666 then
-                local GloveObj = Workspace.Lobby:WaitForChild("Ghost", 2)
-                if GloveObj then
-                    fireclickdetector(GloveObj:FindFirstChildOfClass("ClickDetector"))
-                end
+                Utils.EquipGlove("Ghost")
             else
                 Stewfield:Notify({
                     Title = "Insufficient Slaps",
@@ -51,7 +41,6 @@ VoodooTab:CreateButton({
     end,
 })
 
--- 2. Teleport to Safe Spot
 local function Create(InstanceType, Properties, Children)
     local obj = Instance.new(InstanceType)
     for prop, val in pairs(Properties) do
@@ -69,10 +58,7 @@ end
 VoodooTab:CreateButton({
     Name = "Teleport to Safe Spot",
     Callback = function()
-        local LobbyPath = Workspace:FindFirstChild(LocalPlayer.Name) 
-            and Workspace[LocalPlayer.Name]:FindFirstChild("InLobby")
-
-        if not LobbyPath then
+        if not Utils.IsInLobby() then
             Stewfield:Notify({
                 Title = "Error",
                 Content = "Make sure you're in the lobby.",
@@ -82,7 +68,7 @@ VoodooTab:CreateButton({
             return
         end
 
-        local _, currentGlove = getStats()
+        local _, currentGlove = Utils.GetStats()
         
         if currentGlove ~= "Ghost" then
             Stewfield:Notify({
@@ -94,7 +80,6 @@ VoodooTab:CreateButton({
             return
         end
 
-        -- SafeSpotSpace
         if not workspace:FindFirstChild("SafeBoxSpace") then
             Create("Part", {
                 Name = "SafeBoxSpace",
@@ -107,7 +92,6 @@ VoodooTab:CreateButton({
             })
         end
 
-        -- SafeBox
         if not workspace:FindFirstChild("SafeBox") then
             local SafeBox = Create("Part", {
                 Name = "SafeBox",
@@ -173,14 +157,11 @@ VoodooTab:CreateButton({
             end
         end
 
-        -- Walk to portal
         local portal = Workspace.Lobby.Teleport1
         local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-        local Hum = character:WaitForChild("Humanoid")
         
-        Hum:MoveTo(portal.Position)
+        Utils.WalkToPortal()
         
-        -- Wait until character touches portal
         local entered = false
         local connection
         connection = portal.Touched:Connect(function(hit)
@@ -194,25 +175,19 @@ VoodooTab:CreateButton({
         
         task.wait(1)
 
-        -- Teleport into SafeBox
         LocalPlayer.Character.HumanoidRootPart.CFrame = workspace.SafeBox.CFrame * CFrame.new(0, 5, 0)
     end,
 })
 
--- 3. Begin
 local startTime = nil
 local BeginButton
 
 BeginButton = VoodooTab:CreateButton({
     Name = "Begin",
     Callback = function()
-        local LobbyPath = Workspace:FindFirstChild(LocalPlayer.Name) 
-            and Workspace[LocalPlayer.Name]:FindFirstChild("InLobby")
-        
-        local _, currentGlove = getStats()
+        local _, currentGlove = Utils.GetStats()
 
-        -- Check if in Arena (InLobby should not exist) and Ghost is equipped
-        if not LobbyPath then
+        if not Utils.IsInLobby() then
             if currentGlove == "Ghost" then
                 startTime = tick()
 
@@ -248,7 +223,6 @@ BeginButton = VoodooTab:CreateButton({
     end,
 })
 
--- 4. Anti-AFK Toggle
 local AntiAFKConnection
 local AntiAFKToggle = VoodooTab:CreateToggle({
     Name = "Anti-Disconnect",
@@ -270,13 +244,11 @@ local AntiAFKToggle = VoodooTab:CreateToggle({
     end,
 })
 
--- 5. Instructions
 VoodooTab:CreateParagraph({
     Title = "Instructions",
     Content = "1. Equip Ghost.\n2. Use 'Teleport to Safe Spot'.\n3. In the Safe Box, use 'Begin'.\n4. Use 'Check Time Remaining' to track progress. Ensure Anti-Disconnect is ON."
 })
 
--- 6. Check Time Remaining
 VoodooTab:CreateButton({
     Name = "Check Time Remaining",
     Callback = function()
