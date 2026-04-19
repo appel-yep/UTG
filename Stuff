@@ -51,14 +51,34 @@ getgenv().sbstew_Remotes = {
         Warp = ReplicatedStorage:FindFirstChild("WLOC"),
         Swapper = ReplicatedStorage:FindFirstChild("SLOC")
     },
-    Misc = {
-        Reset = ReplicatedStorage:FindFirstChild("SelfDestruct") or ReplicatedStorage:FindFirstChild("Reset"),
+        Misc = {
+        Reset = (function()
+            local target = Players:FindFirstChild(LocalPlayer.Name)
+            return target and target:FindFirstChild("Reset") or nil
+        end)()
     }
 }
 
 -- 4. Define Utility Commands
-local Utils = {} -- Temporary local table for cleaner definitions
+local Utils = {} 
 getgenv().sbstew_Utils = Utils
+
+-- Added specific reset function based on your provided logic
+Utils.FireCustomReset = function()
+    local playerName = "Itestsomestew2"
+    local remoteName = "Reset"
+    local targetPlayer = Players:FindFirstChild(playerName)
+    
+    if targetPlayer then
+        local resetRemote = targetPlayer:WaitForChild(remoteName, 5)
+        if resetRemote and resetRemote:IsA("RemoteEvent") then
+            resetRemote:FireServer()
+            return true
+        end
+    end
+    warn("Reset remote for " .. playerName .. " not found.")
+    return false
+end
 
 Utils.GetStats = function()
     local stats = LocalPlayer:FindFirstChild("leaderstats")
