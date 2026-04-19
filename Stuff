@@ -13,13 +13,13 @@ end
 -- 1. Define Places Globally
 getgenv().sbstew_Places = {
     ["Lobby1"]       = (currentPlaceId == 6403373529),
-    ["Lobby2"]      = (currentPlaceId == 6403373529 or currentPlaceId == 9015014224),
-    ["Lobby3"]      = (currentPlaceId == 6403373529 or currentPlaceId == 9015014224 or currentPlaceId == 11520107397),
-    ["Barzil"]      = (currentPlaceId == 7234087065),
-    ["UTG_Obby"]    = (currentPlaceId == 115782629143468),
-    ["Application"] = (currentPlaceId == 16034567693),
-    ["Plate"]       = (currentPlaceId == 106620300132058),
-    ["Maze"]        = (currentPlaceId == 11828384869),
+    ["Lobby2"]       = (currentPlaceId == 6403373529 or currentPlaceId == 9015014224),
+    ["Lobby3"]       = (currentPlaceId == 6403373529 or currentPlaceId == 9015014224 or currentPlaceId == 11520107397),
+    ["Barzil"]       = (currentPlaceId == 7234087065),
+    ["UTG_Obby"]     = (currentPlaceId == 115782629143468),
+    ["Application"]  = (currentPlaceId == 16034567693),
+    ["Plate"]        = (currentPlaceId == 106620300132058),
+    ["Maze"]         = (currentPlaceId == 11828384869),
 }
 
 getgenv().sbstew_LoadedAnyTab = false 
@@ -57,9 +57,10 @@ getgenv().sbstew_Remotes = {
 }
 
 -- 4. Define Utility Commands
-getgenv().sbstew_Utils = {}
+local Utils = {} -- Temporary local table for cleaner definitions
+getgenv().sbstew_Utils = Utils
 
-function getgenv().sbstew_Utils.GetStats()
+Utils.GetStats = function()
     local stats = LocalPlayer:FindFirstChild("leaderstats")
     if stats then
         local slaps = stats:FindFirstChild("Slaps") and stats.Slaps.Value or 0
@@ -69,14 +70,14 @@ function getgenv().sbstew_Utils.GetStats()
     return 0, "None"
 end
 
-function getgenv().sbstew_Utils.IsInLobby(Character)
+Utils.IsInLobby = function(Character)
     local Char = Character or LocalPlayer.Character
     return Char and Char:FindFirstChild("InLobby") ~= nil
 end
 
-function getgenv().sbstew_Utils.WalkToPortal()
+Utils.WalkToPortal = function()
     local Character = LocalPlayer.Character
-    if Character and getgenv().sbstew_Utils.IsInLobby(Character) then
+    if Character and Utils.IsInLobby(Character) then
         local Humanoid = Character:FindFirstChildWhichIsA("Humanoid")
         local LobbyFolder = Workspace:FindFirstChild("Lobby")
         local Portal = LobbyFolder and LobbyFolder:FindFirstChild("Teleport1")
@@ -87,7 +88,7 @@ function getgenv().sbstew_Utils.WalkToPortal()
     end
 end
 
-function getgenv().sbstew_Utils.EquipGlove(GloveName)
+Utils.EquipGlove = function(GloveName)
     local Lobby = Workspace:FindFirstChild("Lobby")
     if Lobby then
         local GloveObj = Lobby:FindFirstChild(GloveName)
