@@ -1,5 +1,4 @@
 -- WARP GLOVE TAB SCRIPT
-
 if not getgenv().sbstew_Utils then
     loadstring(game:HttpGet("https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Stuff"))()
 end
@@ -28,7 +27,7 @@ local TargetGlove = "Swapper"
 local SlapRemote = RLibrary.Slap.Swapper
 local AbilityRemote = RLibrary.Ability.Swapper
 local SlapAnimation = ReplicatedStorage.Slap
-local Reset = RLibrary.Misc.PlayerReset
+local Reset = RLibrary.Misc.Reset
 
 local LockedTarget = nil
 local SlapCooldown = false
@@ -80,9 +79,9 @@ local function GetTarget()
 
             task.spawn(function()
                 task.wait(0.35)
-                AbilityRemote:FireServer()
+                if AbilityRemote then AbilityRemote:FireServer() end
                 task.wait(1)
-                Reset:FireServer()
+                if Reset then Reset:FireServer() end
             end)
 
             return nil, 512
@@ -142,7 +141,7 @@ StartLoops = function()
                             if Distance < AcceptableDistance and not SlapCooldown then
                                 SlapCooldown = true
                                 Animation:Play()
-                                SlapRemote:FireServer(TargetRoot)
+                                if SlapRemote then SlapRemote:FireServer(TargetRoot) end
                                 task.delay(0.6, function() SlapCooldown = false end)
                             end
                         end
@@ -182,7 +181,7 @@ StartLoops = function()
 
                 local Root = LocalHumanoid.RootPart
                 if Root and (Root.Position.Magnitude > 1536 or Root.Position.Y < -20) then
-                    Reset:FireServer()
+                    if Reset then Reset:FireServer() end
                     task.wait(1)
                 end
 
