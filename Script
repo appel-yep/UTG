@@ -6,20 +6,18 @@ local loaderUrl = "https://raw.githubusercontent.com/stewingit/sbstew/heads/main
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
--- 1. Auto Queue Logic
 local q = queue_on_teleport or queueteleport or (syn and syn.queue_on_teleport)
 if q and not g.sbstew_Queued then
     g.sbstew_Queued = true
     q('loadstring(game:HttpGet("' .. loaderUrl .. '"))()')
 end
 
--- 2. Cleanup existing UI
 if g.sbstew_Stewfield and typeof(g.sbstew_Stewfield.Destroy) == "function" then
     pcall(function() g.sbstew_Stewfield:Destroy() end)
 end
 
--- 3. Initialise Stewfield
-local Stewfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/stewingit/stewfield/refs/heads/main/source.lua'))()
+local libSource = game:HttpGet('https://raw.githubusercontent.com/stewingit/stewfield/refs/heads/main/source.lua')
+local Stewfield = loadstring(libSource)()
 g.sbstew_Stewfield = Stewfield
 
 local Window = Stewfield:CreateWindow({
@@ -31,8 +29,10 @@ local Window = Stewfield:CreateWindow({
 
 g.sbstew_Window = Window
 
---- 4. External Logic ---
 loadstring(game:HttpGet("https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Stuff"))()
+
+local shouldLoad = g.shouldLoad
+local sbstew_Places = g.sbstew_Places
 
 local createdTabs = {}
 
@@ -48,17 +48,16 @@ local function loadTab(url, name)
     return result
 end
 
---- 5. Tab Loading Section ---
-local isLobby1 = getgenv().sbstew_Places["Lobby1"]
-local isLobby2 = getgenv().sbstew_Places["Lobby2"]
-local isLobby3 = getgenv().sbstew_Places["Lobby3"]
+local isLobby1 = sbstew_Places["Lobby1"]
+local isLobby2 = sbstew_Places["Lobby2"]
+local isLobby3 = sbstew_Places["Lobby3"]
+local isAnyLobby = isLobby1 or isLobby2 or isLobby3
 
 local BadgeTab
 local MiscTab
 
--- Load Info first
 if isLobby3 then
-    loadTab("https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Info")
+    loadTab("https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Info", "Info")
 end
 
 if isLobby3 then
@@ -75,10 +74,9 @@ if isLobby3 then
     })
 end
 
--- Unified Handle Function
 local function handleTab(parentTab, name, locations, url)
     if parentTab and shouldLoad(locations) then
-        getgenv().sbstew_LoadedAnyTab = true 
+        g.sbstew_LoadedAnyTab = true 
 
         local NewButton
         NewButton = parentTab:CreateButton({
@@ -101,21 +99,18 @@ local function handleTab(parentTab, name, locations, url)
     end
 end
 
--- New Auto-Load Logic
 local function manageTab(name, locations, url, parentTab)
-    local places = getgenv().sbstew_Places
     local autoLoad = false
     
     for _, loc in ipairs(locations) do
-        -- If current place matches the location AND it's not a Lobby, then Autoload
-        if places[loc] and not (loc == "Lobby1" or loc == "Lobby2" or loc == "Lobby3") then
+        if sbstew_Places[loc] and not (loc == "Lobby1" or loc == "Lobby2" or loc == "Lobby3") then
             autoLoad = true
             break
         end
     end
 
     if autoLoad then
-        getgenv().sbstew_LoadedAnyTab = true
+        g.sbstew_LoadedAnyTab = true
         task.spawn(function()
             loadTab(url, name)
         end)
@@ -124,13 +119,11 @@ local function manageTab(name, locations, url, parentTab)
     end
 end
 
-getgenv().sbstew_LoadedAnyTab = false
+g.sbstew_LoadedAnyTab = false
 
--- 6. Misc Tabs
 manageTab("Farming", {"Lobby2"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Farming", MiscTab)
 manageTab("Trolling", {"Lobby2"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Trolling", MiscTab)
 
--- 7. Badge Glove Tabs
 manageTab("Admin", {"Lobby3", "Application"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Admin", BadgeTab)
 manageTab("Bomb", {"Lobby2"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Bomb", BadgeTab)
 manageTab("Boxer", {"Lobby3", "Barzil"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Boxer", BadgeTab)
@@ -142,9 +135,8 @@ manageTab("UTG", {"Lobby3", "Barzil", "UTG_Obby"}, "https://raw.githubuserconten
 manageTab("Voodoo", {"Lobby2"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Voodoo", BadgeTab)
 manageTab("Warp", {"Lobby2"}, "https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Tabs/Warp", BadgeTab)
 
--- Check if anything loaded
 task.wait(0.5)
-if not getgenv().sbstew_LoadedAnyTab and not isAnyLobby then
+if not g.sbstew_LoadedAnyTab and not isAnyLobby then
     local ErrorTab = Window:CreateTab("Unsupported", "circle-alert")
     ErrorTab:CreateParagraph({
         Title = "Unsupported Experience",
