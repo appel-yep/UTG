@@ -1,15 +1,16 @@
+-- STUFF SCRIPT
 local currentPlaceId = game.PlaceId
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
 
--- Ensure the game is loaded before proceeding
+-- Ensure the game is loaded
 if not game:IsLoaded() then
     game.Loaded:Wait()
 end
 
--- Define Places Globally
+-- 1. Define Places Globally
 getgenv().sbstew_Places = {
     ["Lobby1"]       = (currentPlaceId == 6403373529),
     ["Lobby2"]      = (currentPlaceId == 6403373529 or currentPlaceId == 9015014224),
@@ -23,21 +24,20 @@ getgenv().sbstew_Places = {
 
 getgenv().sbstew_LoadedAnyTab = false 
 
--- Define shouldLoad Globally
+-- 2. Define shouldLoad Globally
 getgenv().shouldLoad = function(locationList)
     local Places = getgenv().sbstew_Places
     if not Places then return false end
     
     for _, name in pairs(locationList) do
         if Places[name] then 
-            getgenv().sbstew_LoadedAnyTab = true
             return true 
         end
     end
     return false
 end
 
--- Define Remote Library
+-- 3. Define Remote Library
 getgenv().sbstew_Remotes = {
     Slap = {
         Default = ReplicatedStorage:FindFirstChild("b"),
@@ -53,11 +53,10 @@ getgenv().sbstew_Remotes = {
     },
     Misc = {
         Reset = ReplicatedStorage:FindFirstChild("SelfDestruct") or ReplicatedStorage:FindFirstChild("Reset"),
-        PlayerReset = LocalPlayer:FindFirstChild("Reset"),
     }
 }
 
--- Define Utility Commands
+-- 4. Define Utility Commands
 getgenv().sbstew_Utils = {}
 
 function getgenv().sbstew_Utils.GetStats()
@@ -95,10 +94,16 @@ function getgenv().sbstew_Utils.EquipGlove(GloveName)
         if GloveObj then
             local ClickDetector = GloveObj:FindFirstChildOfClass("ClickDetector")
             if ClickDetector then
-                fireclickdetector(ClickDetector)
+                if fireclickdetector then
+                    fireclickdetector(ClickDetector)
+                elseif click_detector then
+                    click_detector(ClickDetector)
+                else
+                    warn("Executor does not support fireclickdetector")
+                end
             end
         end
     end
 end
 
-return true -- Confirms successful load to the loader
+return true
