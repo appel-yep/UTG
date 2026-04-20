@@ -89,7 +89,7 @@ local function GetTarget()
                     local Distance = (LocalHumanoid.RootPart.Position - Root.Position).Magnitude
                     local InMap = (Root.Position - ZeroPosition).Magnitude < RoamRange
                     
-                    if InMap and Distance <= MaxLockDistance and Visible and Utils.IsTargetValid(Character) then
+                    if InMap and Distance <= MaxLockDistance and Utils.IsTargetValid(Character) then
                         LockedTarget = v
                         return v, Distance
                     end
@@ -112,6 +112,7 @@ StartLoops = function()
                     if TargetPlayer and TargetPlayer.Character then
                         local TargetRoot = TargetPlayer.Character:FindFirstChildWhichIsA("Humanoid").RootPart
                         if LocalHumanoid.Health > 0 and TargetRoot then
+                            -- Utilises shared math function
                             local TargetPosition = TargetRoot.Position + Utils.ReturnValidVector3Unit(TargetRoot.AssemblyLinearVelocity)
                             LocalHumanoid:MoveTo(TargetPosition)
 
