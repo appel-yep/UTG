@@ -198,14 +198,11 @@ Utils.StartSafetyLoop = function()
                         ResetRemote:FireServer()
                     end
                     LocalHumanoid.Health = 0
-                    task.wait(1)
+                    task.wait(2)
                 end
             end
         end
     end)
 end
-
--- Automatically start the safety loop when Stuff script loads
-Utils.StartSafetyLoop()
 
 return true
