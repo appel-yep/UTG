@@ -68,6 +68,7 @@ local function GetTarget()
                 task.wait(1)
                 local ResetRemote = Reset()
                 if ResetRemote then ResetRemote:FireServer() end
+                Utils.StopSafetyLoop() -- Deactivate once reset is handled
             end)
 
             return nil, 512
@@ -140,11 +141,15 @@ local function StartLoops()
             end
             RunService.RenderStepped:Wait()
         end
+        Utils.StopSafetyLoop() -- Stop safety loop if BSF main loop breaks
     end)
 
     task.spawn(function()
         while task.wait(0.3) do
-            if not getgenv().BSF then break end
+            if not getgenv().BSF then 
+                Utils.StopSafetyLoop()
+                break 
+            end
             local Character = LocalPlayer.Character
 
             if LocalHumanoid and Character then
@@ -231,6 +236,7 @@ WarpTab:CreateToggle({
     Callback = function(Value)
         InfiniteMode = Value
         if not Value then
+            getgenv().BSF = false -- Kill loops
             Utils.StopSafetyLoop()
         end
     end,
