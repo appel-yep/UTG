@@ -114,13 +114,12 @@ end
 
 -- 5. BOT UTILITIES
 
--- Approximate Base Values
+-- Base Values
 Utils.BotSpeed = 21
-Utils.RoamRange = 120
+Utils.RoamRange = 160
 Utils.MaxLockDistance = 80
 Utils.AcceptableDistance = 15
 
--- Fetch the shared Zero Position dynamically
 Utils.GetZeroPosition = function()
     local arena = Workspace:FindFirstChild("Arena")
     if arena and arena:FindFirstChild("main island") then
@@ -144,6 +143,9 @@ end
 Utils.IsTargetValid = function(Character)
     if not Character then return false end
     
+    local Player = Players:GetPlayerFromCharacter(Character)
+    local PlayerName = Player and Player.Name or ""
+
     local InLobby = Utils.IsInLobby(Character)
     local Rock = Character:FindFirstChild("rock") or Character:FindFirstChild("megarock")
     local Reverse = Character:FindFirstChild("Reversed")
@@ -151,11 +153,11 @@ Utils.IsTargetValid = function(Character)
     local Counter = Character:FindFirstChild("Counterd")
     local Steve = Character:FindFirstChild("stevebody")
     local Ragdolled = Character:FindFirstChild("FakePart Right Arm")
-    
-    local Head = Character:FindFirstChild("Head")
+    local Rob = Workspace:FindFirstChild(PlayerName) and Workspace[PlayerName]:FindFirstChild("RobTransformed")
+    local Visible = Character:FindFirstChild("CarKeysCar") or (Character:FindFirstChild("Head") or Character:FindFirstChildWhichIsA("BasePart")).Transparency == 0
     local BuddyBox = Head and Head:FindFirstChild("BuddyBox")
     
-    return not InLobby and not Rock and not Reverse and not Skull and not Counter and not Steve and not Ragdolled and not BuddyBox
+    return not InLobby and not Rock and not Reverse and not Skull and not Counter and not Steve and not Ragdolled and not BuddyBox and not Rob and Visible
 end
 
 -- Common Character & Animation Setup
