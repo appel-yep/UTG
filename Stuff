@@ -4,6 +4,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
 
 -- Ensure the game is loaded
 if not game:IsLoaded() then
@@ -63,23 +64,6 @@ getgenv().sbstew_Remotes = {
 local Utils = {} 
 getgenv().sbstew_Utils = Utils
 
--- Added specific reset function based on your provided logic
-Utils.FireCustomReset = function()
-    local playerName = "Itestsomestew2"
-    local remoteName = "Reset"
-    local targetPlayer = Players:FindFirstChild(playerName)
-    
-    if targetPlayer then
-        local resetRemote = targetPlayer:WaitForChild(remoteName, 5)
-        if resetRemote and resetRemote:IsA("RemoteEvent") then
-            resetRemote:FireServer()
-            return true
-        end
-    end
-    warn("Reset remote for " .. playerName .. " not found.")
-    return false
-end
-
 Utils.GetStats = function()
     local stats = LocalPlayer:FindFirstChild("leaderstats")
     if stats then
@@ -125,6 +109,74 @@ Utils.EquipGlove = function(GloveName)
             end
         end
     end
+end
+
+
+-- 5. BOT UTILITIES
+
+-- Approximate Base Values
+Utils.BotSpeed = 21
+Utils.RoamRange = 120
+Utils.MaxLockDistance = 80
+Utils.AcceptableDistance = 15
+
+-- Fetch the shared Zero Position dynamically
+Utils.GetZeroPosition = function()
+    local arena = Workspace:FindFirstChild("Arena")
+    if arena and arena:FindFirstChild("main island") then
+        local grass = arena["main island"]:FindFirstChild("Grass")
+        if grass then
+            return grass.Position
+        end
+    end
+    return Vector3.zero
+end
+
+-- Vector Math Utility
+Utils.ReturnValidVector3Unit = function(Vector)
+    if Vector.Magnitude == 0 then
+        return Vector3.zero
+    end
+    return Vector.Unit
+end
+
+-- Common Target Validation
+Utils.IsTargetValid = function(Character)
+    if not Character then return false end
+    
+    local InLobby = Utils.IsInLobby(Character)
+    local Rock = Character:FindFirstChild("rock") or Character:FindFirstChild("megarock")
+    local Reverse = Character:FindFirstChild("Reversed")
+    local Skull = Character:FindFirstChild("Skull")
+    local Counter = Character:FindFirstChild("Counterd")
+    local Steve = Character:FindFirstChild("stevebody")
+    local Ragdolled = Character:FindFirstChild("FakePart Right Arm")
+    
+    local Head = Character:FindFirstChild("Head")
+    local BuddyBox = Head and Head:FindFirstChild("BuddyBox")
+    
+    return not InLobby and not Rock and not Reverse and not Skull and not Counter and not Steve and not Ragdolled and not BuddyBox
+end
+
+-- Common Character & Animation Setup
+Utils.SetupBotSupport = function(Character, SlapAnimation)
+    local Humanoid = Character:WaitForChild("Humanoid", 10)
+    if not Humanoid then return nil, nil end
+    
+    local Animation = (Humanoid:FindFirstChild("Animator") or Humanoid):LoadAnimation(SlapAnimation)
+    Humanoid.AutomaticScalingEnabled = false
+    Humanoid.HipHeight = 0.1
+    
+    local Root = Character:FindFirstChild("HumanoidRootPart") or Character:FindFirstChild("Head")
+    if Root then
+        local Support = Root:FindFirstChild("Bot Support") or Instance.new("BodyPosition")
+        Support.Position = Utils.GetZeroPosition()
+        Support.MaxForce = Vector3.new(200, 0, 200)
+        Support.Name = "Bot Support"
+        Support.Parent = Root
+    end
+    
+    return Humanoid, Animation
 end
 
 return true
