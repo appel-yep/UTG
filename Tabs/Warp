@@ -15,7 +15,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
--- Utilizing variables from Utils
+-- Utilizing shared values from Utils
 local ZeroPosition = Utils.GetZeroPosition()
 local BotSpeed = Utils.BotSpeed
 local RoamRange = Utils.RoamRange
@@ -33,20 +33,17 @@ local LockedTarget = nil
 local SlapCooldown = false
 local LocalHumanoid = nil
 local Animation = nil
-local CharacterConnection = nil
 local InfiniteMode = false
 
 local WarpTab = Window:CreateTab("Warp Glove", "rss")
 WarpTab:CreateLabel("Warp Glove Obtainment")
 
--- Utilizing SetupBotSupport from Utils
+-- Utilizing SetupBotSupport from Stuff Script
 local function CharacterLoaded(Character)
     local Hum, Anim = Utils.SetupBotSupport(Character, SlapAnimation)
     LocalHumanoid = Hum
     Animation = Anim
 end
-
-local StartLoops
 
 local function GetTarget()
     if LockedTarget then
@@ -69,7 +66,8 @@ local function GetTarget()
                 task.wait(0.35)
                 if AbilityRemote then AbilityRemote:FireServer() end
                 task.wait(1)
-                if Reset then Reset:FireServer() end
+                local ResetRemote = Reset()
+                if ResetRemote then ResetRemote:FireServer() end
             end)
 
             return nil, 512
@@ -89,6 +87,7 @@ local function GetTarget()
                     local Distance = (LocalHumanoid.RootPart.Position - Root.Position).Magnitude
                     local InMap = (Root.Position - ZeroPosition).Magnitude < RoamRange
                     
+                    -- Using centralized target validation from Stuff Script
                     if InMap and Distance <= MaxLockDistance and Utils.IsTargetValid(Character) then
                         LockedTarget = v
                         return v, Distance
@@ -101,7 +100,7 @@ local function GetTarget()
     return nil, 512
 end
 
-StartLoops = function()
+local function StartLoops()
     task.spawn(function()
         while getgenv().BSF do
             local Character = LocalPlayer.Character
@@ -112,7 +111,6 @@ StartLoops = function()
                     if TargetPlayer and TargetPlayer.Character then
                         local TargetRoot = TargetPlayer.Character:FindFirstChildWhichIsA("Humanoid").RootPart
                         if LocalHumanoid.Health > 0 and TargetRoot then
-                            -- Utilises shared math function
                             local TargetPosition = TargetRoot.Position + Utils.ReturnValidVector3Unit(TargetRoot.AssemblyLinearVelocity)
                             LocalHumanoid:MoveTo(TargetPosition)
 
@@ -140,7 +138,6 @@ StartLoops = function()
                     LocalHumanoid.WalkSpeed = Speed
                 end
             end
-
             RunService.RenderStepped:Wait()
         end
     end)
@@ -151,16 +148,15 @@ StartLoops = function()
             local Character = LocalPlayer.Character
 
             if LocalHumanoid and Character then
-                if not Utils.IsInLobby(Character) then
+                local inLobby = Utils.IsInLobby(Character)
+            
+                if inLobby then
+                    Utils.StopSafetyLoop()
+                else
+                    Utils.StartSafetyLoop()
                     for _, v in ipairs(Character:GetChildren()) do
                         if v:IsA("BasePart") then v.CanTouch = false end
                     end
-                end
-
-                local Root = LocalHumanoid.RootPart
-                if Root and (Root.Position.Magnitude > 1536 or Root.Position.Y < -20) then
-                    if Reset then Reset:FireServer() end
-                    task.wait(1)
                 end
 
                 if not Character:FindFirstChildWhichIsA("Tool") and LocalPlayer.Backpack:FindFirstChildWhichIsA("Tool") then
@@ -171,8 +167,7 @@ StartLoops = function()
     end)
 end
 
--- Character Connection for Infinite Mode
-CharacterConnection = LocalPlayer.CharacterAdded:Connect(function(char)
+LocalPlayer.CharacterAdded:Connect(function(char)
     task.wait(0.5)
     if InfiniteMode then
         getgenv().BSF = true
@@ -235,6 +230,9 @@ WarpTab:CreateToggle({
     Flag = "AutoWarp_Flag",
     Callback = function(Value)
         InfiniteMode = Value
+        if not Value then
+            Utils.StopSafetyLoop()
+        end
     end,
 })
 
