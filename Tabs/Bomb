@@ -15,12 +15,12 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
-local Grass = Workspace.Arena["main island"].Grass
-local ZeroPosition = Grass.Position
-local BotSpeed = 22
-local RoamRange = 120
-local MaxLockDistance = 80
-local AcceptableDistance = 15
+-- Utilizing variables from Utils
+local ZeroPosition = Utils.GetZeroPosition()
+local BotSpeed = Utils.BotSpeed
+local RoamRange = Utils.RoamRange
+local MaxLockDistance = Utils.MaxLockDistance
+local AcceptableDistance = Utils.AcceptableDistance
 local TargetGlove = "Warp"
 
 local SlapRemote = RLibrary.Slap.Warp
@@ -37,18 +37,9 @@ local BombTab = Window:CreateTab("Bomb Glove", "Bomb")
 BombTab:CreateLabel("Bomb Glove Obtainment")
 
 local function CharacterLoaded(Character)
-    local Humanoid = Character:WaitForChild("Humanoid", 10)
-    LocalHumanoid = Humanoid
-    Animation = (Humanoid:FindFirstChild("Animator") or Humanoid):LoadAnimation(SlapAnimation)
-    Humanoid.AutomaticScalingEnabled = false
-    Humanoid.HipHeight = 0.1
-
-    local Root = Character:WaitForChild("HumanoidRootPart")
-    local Support = Root:FindFirstChild("Bot Support") or Instance.new("BodyPosition")
-    Support.Position = ZeroPosition
-    Support.MaxForce = Vector3.new(200, 0, 200)
-    Support.Name = "Bot Support"
-    Support.Parent = Root
+    local Hum, Anim = Utils.SetupBotSupport(Character, SlapAnimation)
+    LocalHumanoid = Hum
+    Animation = Anim
     HasSlapped = false
 end
 
@@ -63,19 +54,9 @@ local function GetTarget(LocalHumanoid)
                     local Distance = (LocalHumanoid.RootPart.Position - Root.Position).Magnitude
                     local InMap = (Root.Position - ZeroPosition).Magnitude < RoamRange
                     
-                    local InLobby = Utils.IsInLobby(Character)
-                    local Rock = Character:FindFirstChild("rock")
-                    local Reverse = Character:FindFirstChild("Reversed")
-                    local Skull = Character:FindFirstChild("Skull")
-                    local Counter = Character:FindFirstChild("Counterd")
-                    local Steve = Character:FindFirstChild("stevebody")
                     local Visible = Character:FindFirstChild("CarKeysCar") or (Character:FindFirstChild("Head") or Character:FindFirstChildWhichIsA("BasePart")).Transparency == 0
-                    local BuddyBox = Character.Head:FindFirstChild("BuddyBox")
-                    local Ragdolled = Character:FindFirstChild("FakePart Right Arm")
-
-                    local Approved = (InMap and Distance <= MaxLockDistance and not Rock and not Reverse and not Steve and not Skull and Visible and not BuddyBox and not Ragdolled and not InLobby and not Counter)
-
-                    if Approved then
+                    
+                    if InMap and Distance <= MaxLockDistance and Visible and Utils.IsTargetValid(Character) then
                         return Root, Distance
                     end
                 end
