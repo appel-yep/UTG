@@ -19,9 +19,9 @@ local Workspace = game:GetService("Workspace")
 -- Utilizing shared values from Utils
 local ZeroPosition = Utils.GetZeroPosition()
 local BotSpeed = Utils.BotSpeed
-local RoamRange = 160 -- Kept specific to this script
+local RoamRange = Utils.RoamRange
 local MaxLockDistance = Utils.MaxLockDistance
-local AcceptableDistance = 14
+local AcceptableDistance = Utils.AcceptableDistance
 local TargetGlove = "Dice"
 
 local SlapRemote = Remotes.Slap.Dice
@@ -37,7 +37,7 @@ local InfiniteMode = false
 local RNGTab = Window:CreateTab("RNG Glove", "dice-5")
 RNGTab:CreateLabel("RNG Glove Obtainment")
 
--- Utilizing SetupBotSupport from Stuff Script
+-- Utilising
 local function CharacterLoaded(Character)
     local Hum, Anim = Utils.SetupBotSupport(Character, SlapAnimation)
     LocalHumanoid = Hum
@@ -80,7 +80,6 @@ local function StartLoops()
                     if TargetPlayer and TargetPlayer.Character then
                         local TargetRoot = TargetPlayer.Character:FindFirstChildWhichIsA("Humanoid").RootPart
                         if LocalHumanoid.Health > 0 and TargetRoot then
-                            -- Using shared Vector math from Stuff Script
                             local TargetPosition = TargetRoot.Position + Utils.ReturnValidVector3Unit(TargetRoot.AssemblyLinearVelocity)
                             LocalHumanoid:MoveTo(TargetPosition)
 
@@ -122,12 +121,6 @@ local function StartLoops()
                     for _, v in ipairs(Character:GetChildren()) do
                         if v:IsA("BasePart") then v.CanTouch = false end
                     end
-                end
-
-                local Root = LocalHumanoid.RootPart
-                if Root and (Root.Position.Magnitude > 1536 or Root.Position.Y < -20) then
-                    if Reset then Reset:FireServer() end
-                    task.wait(1)
                 end
 
                 if not Character:FindFirstChildWhichIsA("Tool") and LocalPlayer.Backpack:FindFirstChildWhichIsA("Tool") then
@@ -179,6 +172,8 @@ RNGTab:CreateToggle({
     Callback = function(Value)
         getgenv().RNG_Farm = Value
         if Value then
+            Utils.StartSafetyLoop()
+            
             local _, currentGlove = Utils.GetStats()
 
             if currentGlove == "Dice" then
