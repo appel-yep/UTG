@@ -16,11 +16,6 @@ local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
 -- Utilizing variables from Utils
-local ZeroPosition = Utils.GetZeroPosition()
-local BotSpeed = Utils.BotSpeed
-local RoamRange = Utils.RoamRange
-local MaxLockDistance = Utils.MaxLockDistance
-local AcceptableDistance = Utils.AcceptableDistance
 local TargetGlove = "Warp"
 
 local SlapRemote = RLibrary.Slap.Warp
@@ -54,9 +49,9 @@ local function GetTarget(LocalHumanoid)
                 local Root = Humanoid.RootPart
                 if Root then
                     local Distance = (LocalHumanoid.RootPart.Position - Root.Position).Magnitude
-                    local InMap = (Root.Position - ZeroPosition).Magnitude < RoamRange
+                    local InMap = (Root.Position - Utils.GetZeroPosition()).Magnitude < Utils.RoamRange
                     
-                    if InMap and Distance <= MaxLockDistance and Utils.IsTargetValid(Character) then
+                    if InMap and Distance <= Utils.MaxLockDistance and Utils.IsTargetValid(Character) then
                         return Root, Distance
                     end
                 end
@@ -86,7 +81,7 @@ local function StartBombLoop()
                     local TargetRoot, Distance = GetTarget(LocalHumanoid)
                     if TargetRoot then
                         LocalHumanoid:MoveTo(TargetRoot.Position)
-                        if Distance < AcceptableDistance and not SlapCooldown then
+                        if Distance < Utils.AcceptableDistance and not SlapCooldown then
                             SlapCooldown = true
                             Animation:Play()
                             SlapRemote:FireServer(TargetRoot)
@@ -115,11 +110,6 @@ local function StartBombLoop()
                     end
                     
                     getgenv().BSF_Bomb = false -- Stop script
-                end
-
-                -- Maintain Speed
-                if LocalHumanoid.RootPart then
-                    LocalHumanoid.WalkSpeed = BotSpeed
                 end
             end
             RunService.Heartbeat:Wait()
