@@ -1,3 +1,5 @@
+-- RNG GLOVE TAB SCRIPT
+
 if not getgenv().sbstew_Utils then
     loadstring(game:HttpGet("https://raw.githubusercontent.com/stewingit/sbstew/refs/heads/main/Stuff"))()
 end
@@ -14,11 +16,11 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
-local Grass = Workspace.Arena["main island"].Grass
-local ZeroPosition = Grass.Position
-local BotSpeed = 21
-local RoamRange = 160
-local MaxLockDistance = 80
+-- Utilizing variables from Utils
+local ZeroPosition = Utils.GetZeroPosition()
+local BotSpeed = Utils.BotSpeed
+local RoamRange = 160 -- Kept custom as it differs from the default 120
+local MaxLockDistance = Utils.MaxLockDistance
 local AcceptableDistance = 14
 local TargetGlove = "Dice"
 
@@ -35,23 +37,11 @@ local InfiniteMode = false
 local RNGTab = Window:CreateTab("RNG Glove", "dice-5")
 RNGTab:CreateLabel("RNG Glove Obtainment")
 
-local function ReturnValidVector3Unit(Vector)
-    if Vector.Magnitude == 0 then return Vector3.zero end
-    return Vector.Unit
-end
-
+-- Utilizing SetupBotSupport from Utils
 local function CharacterLoaded(Character)
-    local Humanoid = Character:WaitForChild("Humanoid", 10)
-    LocalHumanoid = Humanoid
-    Animation = (Humanoid:FindFirstChild("Animator") or Humanoid):LoadAnimation(SlapAnimation)
-    Humanoid.AutomaticScalingEnabled = false
-    Humanoid.HipHeight = 0.1
-
-    local Support = Humanoid.RootPart:FindFirstChild("Bot Support") or Instance.new("BodyPosition")
-    Support.Position = ZeroPosition
-    Support.MaxForce = Vector3.new(200, 0, 200)
-    Support.Name = "Bot Support"
-    Support.Parent = Humanoid.RootPart
+    local Hum, Anim = Utils.SetupBotSupport(Character, SlapAnimation)
+    LocalHumanoid = Hum
+    Animation = Anim
 end
 
 local function GetTarget()
@@ -67,20 +57,8 @@ local function GetTarget()
                 if Root then
                     local Distance = (LocalHumanoid.RootPart.Position - Root.Position).Magnitude
                     local InMap = (Root.Position - ZeroPosition).Magnitude < RoamRange
-                    local InLobby = Utils.IsInLobby(Character)
-                    local Rock = Character:FindFirstChild("rock")
-                    local Rob = Workspace:FindFirstChild(v.Name) and Workspace[v.Name]:FindFirstChild("RobTransformed")
-                    local Reverse = Character:FindFirstChild("Reversed")
-                    local Skull = Character:FindFirstChild("Skull")
-                    local Counter = Character:FindFirstChild("Counterd")
-                    local Steve = Character:FindFirstChild("stevebody")
-                    local Visible = Character:FindFirstChild("CarKeysCar") or (Character:FindFirstChild("Head") or Character:FindFirstChildWhichIsA("BasePart")).Transparency == 0
-                    local BuddyBox = Character.Head:FindFirstChild("BuddyBox")
-                    local Ragdolled = Character:FindFirstChild("FakePart Right Arm")
 
-                    local Approved = (InMap and Distance < ShortestDistance and not Rock and not Rob and not Reverse and not Steve and not Skull and Visible and not BuddyBox and not Ragdolled and not InLobby and not Counter)
-
-                    if Approved then
+                    if InMap and Distance < ShortestDistance and not Rob and Visible and Utils.IsTargetValid(Character) then
                         ClosestPlayer = v
                         ShortestDistance = Distance
                     end
@@ -102,7 +80,7 @@ local function StartLoops()
                     if TargetPlayer and TargetPlayer.Character then
                         local TargetRoot = TargetPlayer.Character:FindFirstChildWhichIsA("Humanoid").RootPart
                         if LocalHumanoid.Health > 0 and TargetRoot then
-                            local TargetPosition = TargetRoot.Position + ReturnValidVector3Unit(TargetRoot.AssemblyLinearVelocity)
+                            local TargetPosition = TargetRoot.Position + Utils.ReturnValidVector3Unit(TargetRoot.AssemblyLinearVelocity)
                             LocalHumanoid:MoveTo(TargetPosition)
 
                             if Distance < AcceptableDistance and not SlapCooldown then
