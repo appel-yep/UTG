@@ -36,6 +36,7 @@ local HasSlapped = false
 local BombTab = Window:CreateTab("Bomb Glove", "Bomb")
 BombTab:CreateLabel("Bomb Glove Obtainment")
 
+-- Utilizing SetupBotSupport from Utils
 local function CharacterLoaded(Character)
     local Hum, Anim = Utils.SetupBotSupport(Character, SlapAnimation)
     LocalHumanoid = Hum
@@ -43,6 +44,7 @@ local function CharacterLoaded(Character)
     HasSlapped = false
 end
 
+-- Utilizing IsTargetValid from Utils
 local function GetTarget(LocalHumanoid)
     for _, v in ipairs(Players:GetPlayers()) do
         local Character = v.Character
@@ -54,7 +56,7 @@ local function GetTarget(LocalHumanoid)
                     local Distance = (LocalHumanoid.RootPart.Position - Root.Position).Magnitude
                     local InMap = (Root.Position - ZeroPosition).Magnitude < RoamRange
                     
-                    if InMap and Distance <= MaxLockDistance and Visible and Utils.IsTargetValid(Character) then
+                    if InMap and Distance <= MaxLockDistance and Utils.IsTargetValid(Character) then
                         return Root, Distance
                     end
                 end
