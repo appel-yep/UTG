@@ -384,21 +384,7 @@ end
 -- Base Values
 Utils.RoamRange = 120
 Utils.MaxLockDistance = 180
-Utils.GetAcceptableDistance = function()
-    local _, currentGlove = Utils.GetStats() 
-    local baseDistance = 15
-    local longRangeGloves = {
-        ["Orbit"] = true,
-        ["Mace"] = true,
-        ["Extended"] = true
-    }
-    if longRangeGloves[currentGlove] then
-        return baseDistance + 15
-    end
-
-    return baseDistance
-end
-Utils.AcceptableDistance = Utils.GetAcceptableDistance()
+Utils.AcceptableDistance = 15
 
 Utils.GetZeroPosition = function()
     local arena = Workspace:FindFirstChild("Arena")
