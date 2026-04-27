@@ -414,6 +414,7 @@ Utils.IsTargetValid = function(Character)
 
     local InLobby = Utils.IsInLobby(Character)
     local Rock = Character:FindFirstChild("rock") or Character:FindFirstChild("megarock")
+    local Golden = (Character:FindFirstChild("Torso") or Character:FindFirstChild("UpperTorso")) and (Character:FindFirstChild("Torso") or Character:FindFirstChild("UpperTorso")).Material == Enum.Material.Neon and (Character:FindFirstChild("Torso") or Character:FindFirstChild("UpperTorso")).BrickColor == BrickColor.new("New Yeller")
     local Reverse = Character:FindFirstChild("Reversed")
     local Skull = Character:FindFirstChild("Skull")
     local Counter = Character:FindFirstChild("Counterd")
@@ -421,11 +422,10 @@ Utils.IsTargetValid = function(Character)
     local Ragdolled = Character:FindFirstChild("FakePart Right Arm")
     local Rob = Workspace:FindFirstChild(PlayerName) and Workspace[PlayerName]:FindFirstChild("RobTransformed")
     local Visible = Character:FindFirstChild("CarKeysCar") or (Character:FindFirstChild("Head") or Character:FindFirstChildWhichIsA("BasePart")).Transparency == 0
-    
     local Head = Character:FindFirstChild("Head")
     local BuddyBox = Head and Head:FindFirstChild("BuddyBox")
     
-    return not InLobby and not Rock and not Reverse and not Skull and not Counter and not Steve and not Ragdolled and not BuddyBox and not Rob and Visible
+    return not InLobby and not Rock and not Golden and not Reverse and not Skull and not Counter and not Steve and not Ragdolled and not BuddyBox and not Rob and Visible
 end
 
 -- Common Character & Animation Setup
