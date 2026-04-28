@@ -21,13 +21,6 @@ local Animation = nil
 local SlapCooldown = false
 local SlapAnimation = ReplicatedStorage:WaitForChild("Slap")
 
--- Golden ability check
-local function IsGoldenAbilityActive(Character)
-    local Torso = Character:FindFirstChild("Torso") or Character:FindFirstChild("UpperTorso")
-    if not Torso then return false end
-    return Torso.Material == Enum.Material.Neon and Torso.BrickColor == BrickColor.new("New Yeller")
-end
-
 -- Create Tab
 local FarmingTab = Window:CreateTab("Farming", "tractor")
 FarmingTab:CreateLabel("Slap Farming")
@@ -85,19 +78,7 @@ local function StartFarmingLoop()
                                 if Distance < Utils.AcceptableDistance and not SlapCooldown then
                                     SlapCooldown = true
                                     Animation:Play()
-
-                                    if currentGlove == "Golden" then
-                                        local abilityActive = IsGoldenAbilityActive(Character)
-                                        CurrentRemote:FireServer(
-                                            TargetPlayer.Character:FindFirstChild("Left Arm") or TargetRoot,
-                                            abilityActive
-                                        )
-                                    else
-                                        CurrentRemote:FireServer(
-                                            TargetPlayer.Character:FindFirstChild("Left Arm") or TargetRoot
-                                        )
-                                    end
-
+                                    CurrentRemote:FireServer(TargetPlayer.Character:FindFirstChild("Left Arm") or TargetRoot)
                                     task.delay(0.6, function() SlapCooldown = false end)
                                 end
                             end
@@ -107,9 +88,9 @@ local function StartFarmingLoop()
                     else
                         -- Remote not found for equipped glove
                         getgenv().General_Farm = false
-                        Stewfield:Notify({
-                            Title = "Remote Error",
-                            Content = "Remote not found for " .. tostring(currentGlove) .. ". Choose another glove.",
+                            Stewfield:Notify({
+                            Title = "Unsupported glove",
+                            Content = "" .. tostring(currentGlove) .. ". is not supported for farming.",
                             Duration = 4,
                             Image = "circle-alert",
                         })
