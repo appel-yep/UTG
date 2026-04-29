@@ -107,7 +107,7 @@ local function StartFarmingLoop()
                     end
                 else
                     task.wait(1)
-                    Utils.WWalkToPortal()
+                    Utils.WalkToPortal()
                 end
             end
             RunService.RenderStepped:Wait()
@@ -146,17 +146,25 @@ local FarmingDropdown = FarmingTab:CreateDropdown({
     CurrentOption = {"bot"},
     MultipleOptions = true,
     Callback = function(Options)
+
+        if typeof(Options) ~= "table" then
+            Options = {Options}
+        end
+
         local function Force(option)
             FarmingDropdown:Set({option})
             SelectedFarmType = option
             return
         end
+
         if table.find(Options, "snow farm (WILL KICK)") then
             return Force("snow farm (WILL KICK)")
         end
+
         if table.find(Options, "slapple serverhop farm") then
             return Force("slapple serverhop farm")
         end
+
         SelectedFarmType = Options[#Options]
     end,
 })
